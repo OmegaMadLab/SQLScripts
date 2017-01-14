@@ -5,13 +5,13 @@
         "location1": {
             "type": "string",
             "metadata": {
-                "description": "Location where first VNET, Gateway, PublicIP and Connection will be deployed."
+                "description": "Location where Gateway, PublicIP and Connection will be deployed."
             }
         },
         "location2": {
             "type": "string",
             "metadata": {
-                "description": "Location where second VNET, Gateway, PublicIP and Connection will be deployed."
+                "description": "Location where Gateway, PublicIP and Connection will be deployed."
             }
         },
         "virtualNetworkName1": {
@@ -44,31 +44,6 @@
                 "description": "Name of the second VNET."
             }
         },
-        /*"addressPrefix2": {
-            "type": "string",
-            "metadata": {
-                "description": "Address space for the second VNET."
-            }
-        },
-        "subnet1Name2": {
-            "type": "string",
-            "defaultValue": "Subnet-1",
-            "metadata": {
-                "description": "Name of the first subnet in the second VNET. Please note, an additional subnet called GatewaySubnet will be created where the VirtualNetworkGateway will be deployed. The name of that subnet must not be changed from GatewaySubnet."
-            }
-        },
-        "subnet1Prefix2": {
-            "type": "string",
-            "metadata": {
-                "description": "The prefix for the first subnet in the second VNET."
-            }
-        },
-        "gatewaySubnetPrefix2": {
-            "type": "string",
-            "metadata": {
-                "description": "The prefix for the GatewaySubnet where the second VirtualNetworkGateway will be deployed. This must be at least /29."
-            }
-        },*/
         "gatewayPublicIPName2": {
             "type": "string",
             "metadata": {
@@ -125,8 +100,7 @@
             "name": "[parameters('gatewayName1')]",
             "location": "[parameters('location1')]",
             "dependsOn": [
-                "[concat('Microsoft.Network/publicIPAddresses/', parameters('gatewayPublicIPName1'))]",
-                "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName1'))]"
+                "[concat('Microsoft.Network/publicIPAddresses/', parameters('gatewayPublicIPName1'))]"
             ],
             "properties": {
                 "ipConfigurations": [
@@ -154,8 +128,7 @@
             "name": "[parameters('gatewayName2')]",
             "location": "[parameters('location2')]",
             "dependsOn": [
-                "[concat('Microsoft.Network/publicIPAddresses/', parameters('gatewayPublicIPName2'))]",
-                "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName2'))]"
+                "[concat('Microsoft.Network/publicIPAddresses/', parameters('gatewayPublicIPName2'))]"
             ],
             "properties": {
                 "ipConfigurations": [
