@@ -1,0 +1,413 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "mainDCLocation": {
+      "type": "string",
+      "allowedValues": [
+        "North Europe",
+        "West Europe"
+      ],
+      "metadata": {
+        "description": "Location of the main Datacenter"
+      },
+      "defaultValue": "West Europe"
+    },
+    "drDCLocation": {
+      "type": "string",
+      "allowedValues": [
+        "East US",
+        "West Central US"
+      ],
+      "metadata": {
+        "description": "Location of the DR Datacenter"
+      },
+      "defaultValue": "East US"
+    },
+    "mainResPrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "Prefix for main datacenter resources which are created with fixed names"
+      },
+      "defaultValue": "mainDC"
+    },
+    "drResPrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "Prefix for DR datacenter resources which are created with fixed names"
+      },
+      "defaultValue": "drDC"
+    },
+    "sqlStorageAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of Sql Server Storage Account"
+      }
+    },
+    "sqlStorageAccountType": {
+      "type": "string",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_GRS",
+        "Standard_RAGRS",
+        "Premium_LRS"
+      ],
+      "metadata": {
+        "description": "The type of the Sql Server Storage Account created"
+      },
+      "defaultValue": "Standard_LRS"
+    },
+    "dcStorageAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of DC Storage Account"
+      }
+    },
+    "dcStorageAccountType": {
+      "type": "string",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_GRS",
+        "Standard_RAGRS",
+        "Premium_LRS"
+      ],
+      "metadata": {
+        "description": "The type of the DC Storage Account created"
+      },
+      "defaultValue": "Standard_LRS"
+    },
+    "fswStorageAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of File Server Storage Account"
+      }
+    },
+    "diagStorageAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of diagnostic Storage Account"
+      }
+    },
+    "mainVirtualNetworkAddressRange": {
+      "type": "string",
+      "metadata": {
+        "description": "The address range of the main datacenter VNET in CIDR format"
+      },
+      "defaultValue": "10.0.0.0/16"
+    },
+    "mainStaticSubnet": {
+      "type": "string",
+      "metadata": {
+        "description": "The address range of the main datacenter subnet static IPs are allocated from in the new VNET"
+      },
+      "defaultValue": "10.0.0.0/24"
+    },
+    "mainSqlSubnet": {
+      "type": "string",
+      "metadata": {
+        "description": "The address range of the main datacenter SQL subnet created in the new VNET"
+      },
+      "defaultValue": "10.0.1.0/26"
+    },
+    "mainGWSubnet": {
+      "type": "string",
+      "metadata": {
+        "description": "The address range of the main datacenter Gateway subnet created in the new VNET"
+      },
+      "defaultValue": "10.0.2.0/28"
+    },
+    "drVirtualNetworkAddressRange": {
+      "type": "string",
+      "metadata": {
+        "description": "The address range of the DR datacenter VNET in CIDR format"
+      },
+      "defaultValue": "172.16.0.0/16"
+    },
+    "drStaticSubnet": {
+      "type": "string",
+      "metadata": {
+        "description": "The address range of the DR datacenter subnet static IPs are allocated from in the new VNET"
+      },
+      "defaultValue": "172.16.0.0/24"
+    },
+    "drSqlSubnet": {
+      "type": "string",
+      "metadata": {
+        "description": "The address range of the DR datacenter SQL subnet created in the new VNET"
+      },
+      "defaultValue": "172.16.1.0/26"
+    },
+    "drGWSubnet": {
+      "type": "string",
+      "metadata": {
+        "description": "The address range of the DR datacenter Gateway subnet created in the new VNET"
+      },
+      "defaultValue": "172.16.2.0/28"
+    },
+    "vpnSharedKey": {
+      "type": "string",
+      "metadata": {
+        "description": "The preshared key used to establish vNet to vNet VPN"
+      },
+      "defaultValue": "$trongKey!!!"
+    },
+    "templatesBaseUrl": {
+      "type": "string",
+      "metadata": {
+        "description": "Linked Templates base url"
+      },
+
+      "defaultValue": "https://raw.githubusercontent.com/OmegaMadLab/SQLScripts/master/tcdit2017/sqlvm-alwayson-cluster/nested"
+    },
+    "scriptsBaseUrl": {
+      "type": "string",
+      "metadata": {
+        "description": "DSC Scripts base url"
+      },
+      "defaultValue": "https://raw.githubusercontent.com/OmegaMadLab/SQLScripts/master/tcdit2017/sqlvm-alwayson-cluster/scripts"
+    },
+    "numberOfSqlVMDisks": {
+      "type": "string",
+      "allowedValues": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "metadata": {
+        "description": "The Sql VM Disk Size"
+      },
+      "defaultValue": "2"
+    }
+  },
+  "variables": {
+    "subnetNames": {
+      "staticSubnetName": "staticSubnet",
+      "sqlSubnetName": "sqlSubnet"
+    },
+    "primaryDCIPAddressName": "mainDCIP",
+    "backupDCIPAddressName": "drDCIP",
+    "mainVirtualNetworkName": "[concat(parameters('mainResPrefix'),'VNET')]",
+    "drVirtualNetworkName": "[concat(parameters('drResPrefix'),'VNET')]",
+    "mainSubnets": [
+      {
+        "name": "[variables('subnetNames').staticSubnetName]",
+        "properties": {
+          "addressPrefix": "[parameters('mainStaticSubnet')]"
+        }
+      },
+      {
+        "name": "[variables('subnetNames').sqlSubnetName]",
+        "properties": {
+          "addressPrefix": "[parameters('mainSqlSubnet')]"
+        }
+      },
+      {
+        "name": "GatewaySubnet",
+        "properties": {
+          "addressPrefix": "[parameters('mainGWSubnet')]"
+        }
+      }
+    ],
+    "drSubnets": [
+      {
+        "name": "[variables('subnetNames').staticSubnetName]",
+        "properties": {
+          "addressPrefix": "[parameters('drStaticSubnet')]"
+        }
+      },
+      {
+        "name": "[variables('subnetNames').sqlSubnetName]",
+        "properties": {
+          "addressPrefix": "[parameters('drSqlSubnet')]"
+        }
+      },
+      {
+        "name": "GatewaySubnet",
+        "properties": {
+          "addressPrefix": "[parameters('drGWSubnet')]"
+        }
+      }
+    ],
+    "mainGWName": "[concat(parameters('mainResPrefix'),'VnetGW')]",
+    "drGWName": "[concat(parameters('drResPrefix'),'VnetGW')]",
+    "mainVnetConnectionName": "[concat(parameters('mainResPrefix'), '2', parameters('drResPrefix'))]",
+    "drVnetConnectionName": "[concat(parameters('drResPrefix'), '2', parameters('mainResPrefix'))]",
+    "mainGWPublicIPName": "[concat(parameters('mainResPrefix'),'VnetGWip')]",
+    "drGWPublicIPName": "[concat(parameters('drResPrefix'),'VnetGWip')]",
+    "primaryDCIPAddressNameWithSuffix": "[substring(concat(variables('primaryDCIPAddressName'), uniqueString(parameters('sqlStorageAccountName'),parameters('dcStorageAccountName'))),0,15)]",
+    "backupDCIPAddressNameWithSuffix": "[substring(concat(variables('backupDCIPAddressName'), uniqueString(parameters('sqlStorageAccountName'),parameters('dcStorageAccountName'))),0,15)]",
+    "configuration": {
+      "vnet2vnetTemplateURL": "[concat(parameters('templatesBaseUrl'),'/vnet2vnet.json')]",
+      "vnetwithDNSTemplateURL": "[concat(parameters('templatesBaseUrl'),'/vnet-with-dns-server.json')]",
+      "nicTemplateURL": "[concat(parameters('templatesBaseUrl'),'/nic.json')]",
+      "rdpIPAdressSetupURL": "[concat(parameters('templatesBaseUrl'),'/publicip-rdp.json')]",
+      "vnetSetupURL": "[concat(parameters('templatesBaseUrl'),'/vnet-new.json')]",
+      "setupLBsUrl": "[concat(parameters('templatesBaseUrl'),'/setupLBs.json')]",
+      "creatingNicsUrl": "[concat(parameters('templatesBaseUrl'),'/creatingNICS.json')]",
+      "storageAccountVirtualNetworkPublicIP": "[concat(parameters('templatesBaseUrl'),'/storageAccountVirtualNetworkPublicIP.json')]",
+      "provisioningVMs": "[concat(parameters('templatesBaseUrl'),'/provisioningVM',parameters('numberOfSqlVMDisks'),'.json')]",
+      "configuringBackupADVM": "[concat(parameters('templatesBaseUrl'),'/configuringBackupADVM.json')]",
+      "preparingAlwaysOnSqlServer": "[concat(parameters('templatesBaseUrl'),'/preparingSqlServer.json')]",
+      "configuringAlwaysOn": "[concat(parameters('templatesBaseUrl'),'/configuringAlwaysOn.json')]",
+      "adPDCModulesURL": "[concat(parameters('scriptsBaseUrl'),'/CreateADPDC.ps1.zip')]",
+      "adPDCConfigurationFunction": "CreateADPDC.ps1\\CreateADPDC",
+      "adBDCModulesURL": "[concat(parameters('scriptsBaseUrl'),'/CreateADBDC.ps1.zip')]",
+      "adBDCConfigurationFunction": "CreateADBDC.ps1\\CreateADBDC",
+      "fswModulesURL": "[concat(parameters('scriptsBaseUrl'),'/CreateFileShareWitness.ps1.zip')]",
+      "fswConfigurationFunction": "CreateFileShareWitness.ps1\\CreateFileShareWitness",
+      "sqlAOPrepareModulesURL": "[concat(parameters('scriptsBaseUrl'),'/PrepareAlwaysOnSqlServer.ps1.zip')]",
+      "sqlAOPrepareConfigurationFunction": "PrepareAlwaysOnSqlServer.ps1\\PrepareAlwaysOnSqlServer",
+      "createClusterModulesURL": "[concat(parameters('scriptsBaseUrl'),'/CreateFailoverCluster.ps1.zip')]",
+      "createClusterConfigurationFunction": "CreateFailoverCluster.ps1\\CreateFailoverCluster"
+    }
+  },
+  "resources": [
+    {
+      "name": "MainStorageAccountVirtualNetworkPublicIP",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "comments": "This resource will create storage accounts for Active Directory, SQL Server, File Share Witness and Diagnostics on main datacenter. It will also create the Virtual Network and public IP addresses",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('configuration').storageAccountVirtualNetworkPublicIP]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "location": {
+            "value": "[parameters('mainDCLocation')]"
+          },
+          "sqlStorageAccountName": {
+            "value": "[concat(parameters('sqlStorageAccountName'),'main')]"
+          },
+          "dcStorageAccountName": {
+            "value": "[concat(parameters('dcStorageAccountName'),'main')]"
+          },
+          "fswStorageAccountName": {
+            "value": "[concat(parameters('fswStorageAccountName'),'main')]"
+          },
+          "diagStorageAccountName": {
+            "value": "[concat(parameters('diagStorageAccountName'),'main')]"
+          },
+          "SqlStorageAccountType": {
+            "value": "[parameters('sqlStorageAccountType')]"
+          },
+          "DcStorageAccountType": {
+            "value": "[parameters('dcStorageAccountType')]"
+          },
+          "DCIPAddressNameWithSuffix": {
+            "value": "[variables('primaryDCIPAddressNameWithSuffix')]"
+          },
+          "virtualNetworkName": {
+            "value": "[variables('mainVirtualNetworkName')]"
+          },
+          "virtualNetworkAddressRange": {
+            "value": "[parameters('mainVirtualNetworkAddressRange')]"
+          },
+          "subnets": {
+            "value": "[variables('mainSubnets')]"
+          }
+        }
+      }
+    },
+    {
+      "name": "drStorageAccountVirtualNetworkPublicIP",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "comments": "This resource will create storage accounts for Active Directory, SQL Server, File Share Witness and Diagnostics on main datacenter. It will also create the Virtual Network and public IP addresses",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('configuration').storageAccountVirtualNetworkPublicIP]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "location": {
+            "value": "[parameters('drDCLocation')]"
+          },
+          "sqlStorageAccountName": {
+            "value": "[concat(parameters('sqlStorageAccountName'),'dr')]"
+          },
+          "dcStorageAccountName": {
+            "value": "[concat(parameters('dcStorageAccountName'),'dr')]"
+          },
+          "fswStorageAccountName": {
+            "value": "[concat(parameters('fswStorageAccountName'),'dr')]"
+          },
+          "diagStorageAccountName": {
+            "value": "[concat(parameters('diagStorageAccountName'),'dr')]"
+          },
+          "SqlStorageAccountType": {
+            "value": "[parameters('sqlStorageAccountType')]"
+          },
+          "DcStorageAccountType": {
+            "value": "[parameters('dcStorageAccountType')]"
+          },
+          "DCIPAddressNameWithSuffix": {
+            "value": "[variables('backupDCIPAddressNameWithSuffix')]"
+          },
+          "virtualNetworkName": {
+            "value": "[variables('drVirtualNetworkName')]"
+          },
+          "virtualNetworkAddressRange": {
+            "value": "[parameters('drVirtualNetworkAddressRange')]"
+          },
+          "subnets": {
+            "value": "[variables('drSubnets')]"
+          }
+        }
+      }
+    },
+    {
+      "name": "vNet2vNetInfrastructure",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "comments": "This resource will create VNET Gateways and implement VNET to VNET VPN",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('configuration').vnet2vnetTemplateURL]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "location1": {
+            "value": "[parameters('mainDCLocation')]"
+          },
+          "location2": {
+            "value": "[parameters('drDCLocation')]"
+          },
+          "virtualNetworkName1": {
+            "value": "[variables('mainVirtualNetworkName')]"
+          },
+          "virtualNetworkName2": {
+            "value": "[variables('drVirtualNetworkName')]"
+          },
+          "gatewayPublicIPName1": {
+            "value": "[variables('mainGWPublicIPName')]"
+          },
+          "gatewayPublicIPName2": {
+            "value": "[variables('drGWPublicIPName')]"
+          },
+          "gatewayName1": {
+            "value": "[variables('mainGWName')]"
+          },
+          "gatewayName2": {
+            "value": "[variables('drGWName')]"
+          },
+          "ConnectionName1": {
+            "value": "[variables('mainVnetConnectionName')]"
+          },
+          "ConnectionName2": {
+            "value": "[variables('drVnetConnectionName')]"
+          },
+          "SharedKey":
+          {
+            "value": "[parameters('vpnSharedKey')]"
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}
