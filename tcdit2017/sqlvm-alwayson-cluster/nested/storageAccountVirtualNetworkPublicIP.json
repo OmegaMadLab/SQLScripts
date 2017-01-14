@@ -8,15 +8,12 @@
     "dcStorageAccountName": {
       "type": "string"
     },
-<<<<<<< HEAD
     "fswStorageAccountName": {
       "type": "string"
     },
     "diagStorageAccountName": {
       "type": "string"
     },
-=======
->>>>>>> master
     "location": {
       "type": "string"
     },
@@ -35,32 +32,9 @@
     "subnets": {
       "type": "array"
     },
-<<<<<<< HEAD
     "DCIPAddressNameWithSuffix": {
       "type": "string"
-    }/*,
-    "backupDCIPAddressNameWithSuffix": {
-      "type": "string"
-    },*/
-/*    "sql1AddressNameWithSuffix": {
-=======
-    "primaryDCIPAddressNameWithSuffix": {
-      "type": "string"
-    },
-    "backupDCIPAddressNameWithSuffix": {
-      "type": "string"
-    },
-    "sql1AddressNameWithSuffix": {
->>>>>>> master
-      "type": "string"
-    },
-    "sql0AddressNameWithSuffix": {
-      "type": "string"
-<<<<<<< HEAD
-    } */
-=======
     }
->>>>>>> master
   },
   "resources": [
     {
@@ -83,28 +57,16 @@
     },
     {
       "type": "Microsoft.Storage/storageAccounts",
-<<<<<<< HEAD
       "name": "[parameters('fswStorageAccountName')]",
       "apiVersion": "2015-05-01-preview",
       "location": "[parameters('location')]",
       "properties": {
         "accountType": "[parameters('SqlStorageAccountType')]"
-=======
-      "name": "[concat(uniquestring(parameters('sqlStorageAccountName')), 'fsw')]",
-      "apiVersion": "2015-05-01-preview",
-      "location": "[parameters('location')]",
-      "properties": {
-        "accountType": "Standard_LRS"
->>>>>>> master
       }
     },
     {
       "type": "Microsoft.Storage/storageAccounts",
-<<<<<<< HEAD
       "name": "[parameters('diagStorageAccountName')]",
-=======
-      "name": "[concat(uniquestring(parameters('sqlStorageAccountName')), 'diag')]",
->>>>>>> master
       "apiVersion": "2015-05-01-preview",
       "location": "[parameters('location')]",
       "properties": {
@@ -114,43 +76,12 @@
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/publicIPAddresses",
-<<<<<<< HEAD
       "name": "[parameters('DCIPAddressNameWithSuffix')]",
-=======
-      "name": "[parameters('primaryDCIPAddressNameWithSuffix')]",
->>>>>>> master
       "location": "[parameters('location')]",
       "properties": {
         "publicIPAllocationMethod": "Dynamic"
       }
     },
-/*    {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Network/publicIPAddresses",
-      "name": "[parameters('backupDCIPAddressNameWithSuffix')]",
-      "location": "[parameters('location')]",
-      "properties": {
-        "publicIPAllocationMethod": "dynamic"
-      }
-    },*/
-/*    {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Network/publicIPAddresses",
-      "name": "[parameters('sql1AddressNameWithSuffix')]",
-      "location": "[parameters('location')]",
-      "properties": {
-        "publicIPAllocationMethod": "Dynamic"
-      }
-    },*/
-/*    {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Network/publicIPAddresses",
-      "name": "[parameters('sql0AddressNameWithSuffix')]",
-      "location": "[parameters('location')]",
-      "properties": {
-        "publicIPAllocationMethod": "Dynamic"
-      }
-    },*/
     {
       "name": "[parameters('virtualNetworkName')]",
       "type": "Microsoft.Network/virtualNetworks",
