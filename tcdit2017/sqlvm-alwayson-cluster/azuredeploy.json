@@ -347,6 +347,7 @@
       "metadata": {
         "description": "Linked Templates base url"
       },
+
       "defaultValue": "https://raw.githubusercontent.com/OmegaMadLab/SQLScripts/master/tcdit2017/sqlvm-alwayson-cluster/nested"
     },
     "scriptsBaseUrl": {
