@@ -140,7 +140,7 @@
     "witnessVMSize": {
       "type": "string",
       "allowedValues": [
-                "Standard_D1_v2",
+        "Standard_D1_v2",
         "Standard_D2_v2",
         "Standard_D3_v2",
         "Standard_D4_v2",
@@ -246,7 +246,6 @@
       },
       "defaultValue": "Standard_LRS"
     },
-<<<<<<< HEAD
     "fswStorageAccountName": {
       "type": "string",
       "metadata": {
@@ -259,8 +258,6 @@
         "description": "The name of diagnostic Storage Account"
       }
     },
-=======
->>>>>>> master
     "mainVirtualNetworkAddressRange": {
       "type": "string",
       "metadata": {
@@ -547,7 +544,6 @@
     "Sunday": true,
     "Never": false,
     "Everyday": true,
-<<<<<<< HEAD
     "mainSubnets": [
       {
         "name": "[variables('subnetNames').staticSubnetName]",
@@ -703,13 +699,6 @@
             "value": "[variables('backupDCIPAddressNameWithSuffix')]"
           },*/
          /* "sql1AddressNameWithSuffix": {
-          "primaryDCIPAddressNameWithSuffix": {
-            "value": "[variables('primaryDCIPAddressNameWithSuffix')]"
-          },
-          "backupDCIPAddressNameWithSuffix": {
-            "value": "[variables('backupDCIPAddressNameWithSuffix')]"
-          },
-          "sql1AddressNameWithSuffix": {
             "value": "[variables('sql1AddressNameWithSuffix')]"
           },
           "sql0AddressNameWithSuffix": {

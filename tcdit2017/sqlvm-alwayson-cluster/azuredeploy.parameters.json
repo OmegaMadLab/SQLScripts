@@ -32,12 +32,15 @@
       "dcStorageAccountName":{  
          "value":"GEN-UNIQUE"
       },
+<<<<<<< HEAD
       "fswStorageAccountName":{  
          "value":"GEN-UNIQUE"
       },
       "diagStorageAccountName":{  
          "value":"GEN-UNIQUE"
       },
+=======
+>>>>>>> master
       "adVMSize":{  
          "value":"Standard_D1_v2"
       },
