@@ -2,62 +2,74 @@
    "$schema":"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
    "contentVersion":"1.0.0.0",
    "parameters":{  
-      "mainDCLocation":{
-          "value":"West Europe"
-      },
-      "drDCLocation":{
-          "value":"East US"
-      },
-      "mainResPrefix":{
-          "value":"mainDC"
-      },
-      "drResPrefix":{
-          "value":"drDC"
-      },
-      "sqlStorageAccountType":{  
-         "value":"Standard_LRS"
-      },
-      "dcStorageAccountType":{  
-         "value":"Standard_LRS"
-      },
-      "sqlStorageAccountName":{  
-         "value":"mosqlsa"
-      },
-      "dcStorageAccountName":{  
-         "value":"modcsa"
-      },
-      "fswStorageAccountName":{  
-         "value":"mofswsa"
-      },
-      "diagStorageAccountName":{  
-         "value":"modiagsa"
-      },
-      "mainVirtualNetworkAddressRange":{  
-         "value":"10.0.0.0/16"
-      },
-      "mainStaticSubnet":{  
-         "value":"10.0.0.0/24"
-      },
-      "mainSqlSubnet":{  
-         "value":"10.0.1.0/26"
-      },
-      "mainGWSubnet":{  
-         "value":"10.0.2.0/28"
-      },
-      "drVirtualNetworkAddressRange":{  
-         "value":"172.16.0.0/16"
-      },
-      "drStaticSubnet":{  
-         "value":"172.16.0.0/24"
-      },
-      "drSqlSubnet":{  
-         "value":"172.16.1.0/26"
-      },
-      "drGWSubnet":{  
-         "value":"172.16.2.0/28"
-      },
-      "vpnSharedKey":{
-          "value":"$trongKey!!!!!!!"
-      }
-   }
+        "mainDCLocation":{
+            "value":"West Europe"
+        },
+        "drDCLocation":{
+            "value":"East US"
+        },
+        "mainResPrefix":{
+            "value":"mainDC"
+        },
+        "drResPrefix":{
+            "value":"drDC"
+        },
+        "sqlStorageAccountType":{  
+            "value":"Standard_LRS"
+        },
+        "dcStorageAccountType":{  
+            "value":"Standard_LRS"
+        },
+        "sqlStorageAccountName":{  
+            "value":"mosqlsa"
+        },
+        "dcStorageAccountName":{  
+            "value":"modcsa"
+        },
+        "fswStorageAccountName":{  
+            "value":"mofswsa"
+        },
+        "diagStorageAccountName":{  
+            "value":"modiagsa"
+        },
+        "mainVirtualNetworkAddressRange":{  
+            "value":"10.0.0.0/16"
+        },
+        "mainStaticSubnet":{  
+            "value":"10.0.0.0/24"
+        },
+        "mainSqlSubnet":{  
+            "value":"10.0.1.0/26"
+        },
+        "mainGWSubnet":{  
+            "value":"10.0.2.0/28"
+        },
+        "drVirtualNetworkAddressRange":{  
+            "value":"172.16.0.0/16"
+        },
+        "drStaticSubnet":{  
+            "value":"172.16.0.0/24"
+        },
+        "drSqlSubnet":{  
+            "value":"172.16.1.0/26"
+        },
+        "drGWSubnet":{  
+            "value":"172.16.2.0/28"
+        },
+        "vpnSharedKey":{
+            "value":"StR0nGkEy"
+        },
+        "mainSqlLBIPAddress":{
+            "value": "10.0.1.9"
+        },
+        "drSqlLBIPAddress":{
+            "value": "172.16.1.9"
+        },
+        "adPDCNICIPAddress":{
+            "value": "10.0.0.4"
+        },
+        "adBDCNICIPAddress":{
+            "value": "172.16.0.5"
+        }
+    }
 }

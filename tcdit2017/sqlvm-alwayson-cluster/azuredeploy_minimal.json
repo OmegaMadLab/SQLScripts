@@ -2,6 +2,21 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "templatesBaseUrl": {
+      "type": "string",
+      "metadata": {
+        "description": "Linked Templates base url"
+      },
+
+      "defaultValue": "https://raw.githubusercontent.com/OmegaMadLab/SQLScripts/master/tcdit2017/sqlvm-alwayson-cluster/nested"
+    },
+    "scriptsBaseUrl": {
+      "type": "string",
+      "metadata": {
+        "description": "DSC Scripts base url"
+      },
+      "defaultValue": "https://raw.githubusercontent.com/OmegaMadLab/SQLScripts/master/tcdit2017/sqlvm-alwayson-cluster/scripts"
+    },
     "mainDCLocation": {
       "type": "string",
       "allowedValues": [
@@ -149,22 +164,35 @@
       "metadata": {
         "description": "The preshared key used to establish vNet to vNet VPN"
       },
-      "defaultValue": "$trongKey!!!"
+      "defaultValue": "StR0nGkEy"
     },
-    "templatesBaseUrl": {
+    "adPDCNICIPAddress": {
       "type": "string",
       "metadata": {
-        "description": "Linked Templates base url"
+        "description": "The IP address of the new AD VM"
       },
-
-      "defaultValue": "https://raw.githubusercontent.com/OmegaMadLab/SQLScripts/master/tcdit2017/sqlvm-alwayson-cluster/nested"
+      "defaultValue": "10.0.0.4"
     },
-    "scriptsBaseUrl": {
+    "adBDCNICIPAddress": {
       "type": "string",
       "metadata": {
-        "description": "DSC Scripts base url"
+        "description": "The IP address of the new backup AD VM"
       },
-      "defaultValue": "https://raw.githubusercontent.com/OmegaMadLab/SQLScripts/master/tcdit2017/sqlvm-alwayson-cluster/scripts"
+      "defaultValue": "172.16.0.5"
+    },
+    "mainSqlLBIPAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "The IP address of the main datacenter SQL Server Internal Load Balancer"
+    },
+    "defaultValue": "10.0.1.9"
+    },
+    "drSqlLBIPAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "The IP address of the DR datacenter SQL Server Internal Load Balancer"
+    },
+    "defaultValue": "172.16.1.9"
     },
     "numberOfSqlVMDisks": {
       "type": "string",
@@ -235,8 +263,61 @@
     "drVnetConnectionName": "[concat(parameters('drResPrefix'), '2', parameters('mainResPrefix'))]",
     "mainGWPublicIPName": "[concat(parameters('mainResPrefix'),'VnetGWip')]",
     "drGWPublicIPName": "[concat(parameters('drResPrefix'),'VnetGWip')]",
-    "primaryDCIPAddressNameWithSuffix": "[substring(concat(variables('primaryDCIPAddressName'), uniqueString(parameters('sqlStorageAccountName'),parameters('dcStorageAccountName'))),0,15)]",
-    "backupDCIPAddressNameWithSuffix": "[substring(concat(variables('backupDCIPAddressName'), uniqueString(parameters('sqlStorageAccountName'),parameters('dcStorageAccountName'))),0,15)]",
+    "lbSettings": {
+      "rdpLBFE": "rdpLBFE",
+      "mainSqlLBFE": "[concat(parameters('mainResPrefix'),'-sqlLBFE')]",
+      "drSqlLBFE": "[concat(parameters('drResPrefix'),'-sqlLBFE')]",
+      "mainSqlLBBE": "[concat(parameters('mainResPrefix'),'-sqlLBBE')]",
+      "drSqlLBBE": "[concat(parameters('drResPrefix'),'-sqlLBBE')]",
+      "mainSqlLBName": "[concat(parameters('mainResPrefix'),'-sqlLoadBalancer')]",
+      "drSqlLBName": "[concat(parameters('drResPrefix'),'-sqlLoadBalancer')]"
+    },
+    "mainVnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('mainVirtualNetworkName'))]",
+    "mainStaticSubnetRef": "[concat(variables('mainVnetID'),'/subnets/',variables('subnetNames').staticSubnetName)]",
+    "mainSqlSubnetRef": "[concat(variables('mainVnetID'),'/subnets/',variables('subnetNames').sqlSubnetName)]",
+    "drVnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('drVirtualNetworkName'))]",
+    "drStaticSubnetRef": "[concat(variables('drVnetID'),'/subnets/',variables('subnetNames').staticSubnetName)]",
+    "drSqlSubnetRef": "[concat(variables('drVnetID'),'/subnets/',variables('subnetNames').sqlSubnetName)]",
+    "SQLAOProbe": "SQLAlwaysOnEndPointProbe",
+    "ids": {
+      "mainSqllbID": "[resourceId('Microsoft.Network/loadBalancers',variables('lbSettings').mainSqlLBName)]",
+      "drSqllbID": "[resourceId('Microsoft.Network/loadBalancers',variables('lbSettings').drSqlLBName)]"
+    },
+    "derivedIds": {
+      "mainSqlBEAddressPoolID": "[concat(variables('ids').mainSqllbID,'/backendAddressPools/',variables('lbSettings').mainSqlLBBE)]",
+      "mainSqllbFEConfigID": "[concat(variables('ids').mainSqllbID,'/frontendIPConfigurations/',variables('lbSettings').mainSqlLBFE)]",
+      "mainSqllbProbeID": "[concat(variables('ids').mainSqllbID,'/probes/',concat(parameters('mainResPrefix'),'-',variables('SQLAOProbe')))]",
+      "drSqlBEAddressPoolID": "[concat(variables('ids').drSqllbID,'/backendAddressPools/',variables('lbSettings').drSqlLBBE)]",
+      "drSqllbFEConfigID": "[concat(variables('ids').drSqllbID,'/frontendIPConfigurations/',variables('lbSettings').drSqlLBFE)]",
+      "drSqllbProbeID": "[concat(variables('ids').drSqllbID,'/probes/',concat(parameters('drResPrefix'),'-',variables('SQLAOProbe')))]"
+    },
+    "vmSettings": {
+      "availabilitySets": {
+        "sqlAvailabilitySetName": "sqlAvailabilitySet",
+        "adAvailabilitySetName": "adAvailabilitySet"
+      },
+      "noOfSqlVMs": 3,
+      "vmContainerName": "vhds",
+      "adPDCVMName": "ad-primary-dc",
+      "adBDCVMName": "ad-secondary-dc",
+      "sqlVMName": "sqlserver-",
+      "sqlwVMName": "cluster-fsw",
+      "windowsImagePublisher": "MicrosoftWindowsServer",
+      "windowsImageOffer": "WindowsServer",
+      "windowsImageSKU": "2012-R2-Datacenter",
+      "sqlImagePublisher": "MicrosoftSQLServer",
+      "rdpPort": 3389,
+      "windowsDiskSize": 128,
+      "sqlDiskSize": 1000
+    },
+    "adPDCNicName": "[concat(variables('vmSettings').adPDCVMName,'-nic')]",
+    "adBDCNicName": "[concat(variables('vmSettings').adBDCVMName,'-nic')]",
+    "sqlwNicName": "[concat(variables('vmSettings').sqlwVMName,'-nic')]",
+    "primaryDCIPAddressNameWithSuffix": "[concat(variables('vmSettings').adPDCVMName,'-ip')]",
+    "backupDCIPAddressNameWithSuffix": "[concat(variables('vmSettings').adBDCVMName,'-ip')]",
+    "sql0AddressNameWithSuffix": "[concat(variables('vmSettings').sqlVMName,'0-ip')]",
+    "sql1AddressNameWithSuffix": "[concat(variables('vmSettings').sqlVMName,'1-ip')]",
+    "sql2AddressNameWithSuffix": "[concat(variables('vmSettings').sqlVMName,'2-ip')]",
     "configuration": {
       "vnet2vnetTemplateURL": "[concat(parameters('templatesBaseUrl'),'/vnet2vnet.json')]",
       "vnetwithDNSTemplateURL": "[concat(parameters('templatesBaseUrl'),'/vnet-with-dns-server.json')]",
@@ -404,6 +485,177 @@
           "SharedKey":
           {
             "value": "[parameters('vpnSharedKey')]"
+          }
+        }
+      }
+    },
+    {
+      "name": "mainLoadBalancers",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "comments": "Create Load Balancers for SQL on main datacenter",
+      "dependsOn": [
+        "Microsoft.Resources/deployments/mainStorageAccountVirtualNetworkPublicIP"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('configuration').setupLBsUrl]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "location": {
+            "value": "[parameters('mainDCLocation')]"
+          },
+          "sqlLBName": {
+            "value": "[variables('lbSettings').mainSqlLBName]"
+          },
+          "sqlLBFE": {
+            "value": "[variables('lbSettings').mainSqlLBFE]"
+          },
+          "sqlLBIPAddress": {
+            "value": "[parameters('mainSqlLBIPAddress')]"
+          },
+          "staticSubnetRef": {
+            "value": "[variables('mainSqlSubnetRef')]"
+          },
+          "sqlLBBE": {
+            "value": "[variables('lbSettings').mainSqlLBBE]"
+          },
+          "sqlLBBEID": {
+            "value": "[variables('derivedIds').mainSqlBEAddressPoolID]"
+          },
+          "sqllbFEConfigID": {
+            "value": "[variables('derivedIds').mainSqllbFEConfigID]"
+          },
+          "sqllbProbeID": {
+            "value": "[variables('derivedIds').mainSqllbProbeID]"
+          },
+          "SQLAOProbe": {
+            "value": "[concat(parameters('mainResPrefix'),'-',variables('SQLAOProbe'))]"
+          }
+        }
+      }
+    },
+    {
+      "name": "drLoadBalancers",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "comments": "Create Load Balancers for SQL on DR datacenter",
+      "dependsOn": [
+        "Microsoft.Resources/deployments/drStorageAccountVirtualNetworkPublicIP"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('configuration').setupLBsUrl]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "location": {
+            "value": "[parameters('drDCLocation')]"
+          },
+          "sqlLBName": {
+            "value": "[variables('lbSettings').drSqlLBName]"
+          },
+          "sqlLBFE": {
+            "value": "[variables('lbSettings').drSqlLBFE]"
+          },
+          "sqlLBIPAddress": {
+            "value": "[parameters('drSqlLBIPAddress')]"
+          },
+          "staticSubnetRef": {
+            "value": "[variables('drSqlSubnetRef')]"
+          },
+          "sqlLBBE": {
+            "value": "[variables('lbSettings').drSqlLBBE]"
+          },
+          "sqlLBBEID": {
+            "value": "[variables('derivedIds').drSqlBEAddressPoolID]"
+          },
+          "sqllbFEConfigID": {
+            "value": "[variables('derivedIds').drSqllbFEConfigID]"
+          },
+          "sqllbProbeID": {
+            "value": "[variables('derivedIds').drSqllbProbeID]"
+          },
+          "SQLAOProbe": {
+            "value": "[concat(parameters('drResPrefix'),'-',variables('SQLAOProbe'))]"
+          }
+        }
+      }
+    },
+    {
+      "name": "CreatingNetworkInterfaces",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [
+        "Microsoft.Resources/deployments/mainLoadBalancers",
+        "Microsoft.Resources/deployments/drLoadBalancers"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('configuration').creatingNicsUrl]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "mainLocation": {
+            "value": "[parameters('mainDCLocation')]"
+          },
+          "drLocation": {
+            "value": "[parameters('drDCLocation')]"
+          },
+          "adPDCNicName": {
+            "value": "[variables('adPDCNicName')]"
+          },
+          "adPDCNICIPAddress": {
+            "value": "[parameters('adPDCNICIPAddress')]"
+          },
+          "mainStaticSubnetRef": {
+            "value": "[variables('mainStaticSubnetRef')]"
+          },
+          "drStaticSubnetRef": {
+            "value": "[variables('drStaticSubnetRef')]"
+          },
+          "adBDCNicName": {
+            "value": "[variables('adBDCNicName')]"
+          },
+          "adBDCNICIPAddress": {
+            "value": "[parameters('adBDCNICIPAddress')]"
+          },
+          "sqlVMName": {
+            "value": "[variables('vmSettings').sqlVMName]"
+          },
+          "mainSqlSubnetRef": {
+            "value": "[variables('mainSqlSubnetRef')]"
+          },
+          "drSqlSubnetRef": {
+            "value": "[variables('drSqlSubnetRef')]"
+          },          
+          "mainSqlBEAddressPoolID": {
+            "value": "[variables('derivedIds').mainSqlBEAddressPoolID]"
+          },
+          "drSqlBEAddressPoolID": {
+            "value": "[variables('derivedIds').drSqlBEAddressPoolID]"
+          },
+          "sqlwNicName": {
+            "value": "[variables('sqlwNicName')]"
+          },
+          "primaryDCIPAddressNameWithSuffix": {
+            "value": "[variables('primaryDCIPAddressNameWithSuffix')]"
+          },
+          "backupDCIPAddressNameWithSuffix": {
+            "value": "[variables('backupDCIPAddressNameWithSuffix')]"
+          },
+          "sql0AddressNameWithSuffix": {
+            "value": "[variables('sql0AddressNameWithSuffix')]"
+          },
+          "sql1AddressNameWithSuffix": {
+            "value": "[variables('sql1AddressNameWithSuffix')]"
+          },
+          "sql2AddressNameWithSuffix": {
+            "value": "[variables('sql2AddressNameWithSuffix')]"
           }
         }
       }
