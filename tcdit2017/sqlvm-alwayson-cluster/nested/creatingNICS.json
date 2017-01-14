@@ -58,7 +58,7 @@
     },
      "sql2AddressNameWithSuffix": {
       "type": "string"
-    },
+    }
   },
   "resources": [
     {
@@ -121,9 +121,6 @@
               "subnet": {
                 "id": "[parameters('mainSqlSubnetRef')]"
               },
-              "publicIpAddress": {
-                "id": "[resourceId(resourceGroup().Name,'Microsoft.Network/publicIpAddresses', parameters('sql0AddressNameWithSuffix'))]"
-              },
               "loadBalancerBackendAddressPools": [
                 {
                   "id": "[parameters('mainSqlBEAddressPoolID')]"
@@ -148,9 +145,6 @@
               "subnet": {
                 "id": "[parameters('mainSqlSubnetRef')]"
               },
-              "publicIpAddress": {
-                "id": "[resourceId(resourceGroup().Name,'Microsoft.Network/publicIpAddresses', parameters('sql1AddressNameWithSuffix'))]"
-              },
               "loadBalancerBackendAddressPools": [
                 {
                   "id": "[parameters('mainSqlBEAddressPoolID')]"
@@ -174,9 +168,6 @@
               "privateIPAllocationMethod": "Dynamic",
               "subnet": {
                 "id": "[parameters('drSqlSubnetRef')]"
-              },
-              "publicIpAddress": {
-                "id": "[resourceId(resourceGroup().Name,'Microsoft.Network/publicIpAddresses', parameters('sql2AddressNameWithSuffix'))]"
               },
               "loadBalancerBackendAddressPools": [
                 {
