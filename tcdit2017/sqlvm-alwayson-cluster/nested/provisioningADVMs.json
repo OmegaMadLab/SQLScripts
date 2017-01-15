@@ -235,26 +235,6 @@
         },
         "subnets": "[parameters('mainVnetSubnets')]"
       }
-    },
-        {
-      "name": "[parameters('mainVnetName')]",
-      "type": "Microsoft.Network/virtualNetworks",
-      "location": "[parameters('mainLocation')]",
-      "dependsOn": [
-            "[concat('Microsoft.Compute/virtualMachines/',parameters('adPDCVMName'),'/extensions/InstallDomainController')]"
-          ],
-      "apiVersion": "2015-06-15",
-      "properties": {
-        "addressSpace": {
-          "addressPrefixes": [
-            "[parameters('mainVnetAddressSpace')]"
-          ]
-        },
-        "dhcpOptions": {
-          "dnsServers": "[parameters('adPDCNICIpAddress')]"
-        },
-        "subnets": "[parameters('mainVnetSubnets')]"
-      }
     },    
     {
       "name": "[parameters('drVnetName')]",
@@ -366,26 +346,6 @@
               }
           }
         }
-    },
-    {
-      "name": "[parameters('drVnetName')]",
-      "type": "Microsoft.Network/virtualNetworks",
-      "location": "[parameters('drLocation')]",
-      "dependsOn": [
-            "[concat('Microsoft.Compute/virtualMachines/',parameters('adPDCVMName'),'/extensions/CreateBDC')]"
-          ],
-      "apiVersion": "2015-06-15",
-      "properties": {
-        "addressSpace": {
-          "addressPrefixes": [
-            "[parameters('drVnetAddressSpace')]"
-          ]
-        },
-        "dhcpOptions": {
-          "dnsServers": "[parameters('adBDCNICIpAddress')]"
-        },
-        "subnets": "[parameters('drVnetSubnets')]"
-      }
     }
   ],
   "outputs": {}
