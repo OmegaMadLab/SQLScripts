@@ -5,7 +5,7 @@
     "sqlStorageAccountName": {
       "type": "string"
     },
-    "dcStorageAccountName": {
+    "adStorageAccountName": {
       "type": "string"
     },
     "fswStorageAccountName": {
@@ -20,7 +20,7 @@
     "SqlStorageAccountType": {
       "type": "string"
     },
-    "DcStorageAccountType": {
+    "adStorageAccountType": {
       "type": "string"
     },
     "virtualNetworkName": {
@@ -48,11 +48,11 @@
     },
     {
       "type": "Microsoft.Storage/storageAccounts",
-      "name": "[parameters('dcStorageAccountName')]",
+      "name": "[parameters('adStorageAccountName')]",
       "apiVersion": "2015-05-01-preview",
       "location": "[parameters('location')]",
       "properties": {
-        "accountType": "[parameters('DcStorageAccountType')]"
+        "accountType": "[parameters('adStorageAccountType')]"
       }
     },
     {

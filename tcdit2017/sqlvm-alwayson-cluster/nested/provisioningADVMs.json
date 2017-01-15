@@ -1,0 +1,245 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "mainLocation": {
+      "type": "string"
+    },
+    "drLocation": {
+      "type": "string"
+    },
+    "AdAvailabilitySetName": {
+      "type": "string"
+    },
+    "adVMSize": {
+      "type": "string"
+    },
+    "adminUsername": {
+      "type": "string"
+    },
+    "adminPassword": {
+      "type": "securestring"
+    },
+    "adImagePublisher": {
+      "type": "string"
+    },
+    "adImageOffer": {
+      "type": "string"
+    },
+    "adImageSKU": {
+      "type": "string"
+    },
+    "adPDCVMName": {
+      "type": "string"
+    },
+    "adPDCNicName": {
+      "type": "string"
+    },
+    "adPDCConfigurationFunction": {
+      "type": "string"
+    },
+    "adPDCModulesURL": {
+      "type": "string"
+    },
+    "adBDCVMName": {
+      "type": "string"
+    },
+    "adBDCNicName": {
+      "type": "string"
+    },
+    "adStorageAccountName": {
+      "type": "string"
+    },
+    "diagStorageAccountName": {
+      "type": "string"
+    },
+    "vmContainerName": {
+      "type": "string"
+    },
+    "domainName": {
+      "type": "string"
+    }
+  },
+  "variables": {
+    "mainADstorageName": "[concat(parameters('adStorageAccountName'),parameters('mainLocation'))]",
+    "drADstorageName": "[concat(parameters('adStorageAccountName'),parameters('drLocation'))]",
+    "mainDiagstorageName": "[concat(parameters('diagStorageAccountName'),parameters('mainLocation'))]",
+    "drDiagstorageName": "[concat(parameters('diagStorageAccountName'),parameters('drLocation'))]",
+    "mainAvSetName": "[concat(parameters('AdAvailabilitySetName'),parameters('mainLocation'))]",
+    "drAvSetName": "[concat(parameters('AdAvailabilitySetName'),parameters('drLocation'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Compute/availabilitySets",
+      "name": "[variables('mainAvSetName')]",
+      "apiVersion": "2015-06-15",
+      "location": "[parameters('mainLocation')]"
+    },
+    {
+      "type": "Microsoft.Compute/availabilitySets",
+      "name": "[variables('drAvSetName')]",
+      "apiVersion": "2015-06-15",
+      "location": "[parameters('drLocation')]"
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[parameters('adPDCVMName')]",
+      "location": "[parameters('mainLocation')]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/availabilitySets/',variables('mainAvSetName'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('adVMSize')]"
+        },
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('mainAvSetName'))]"
+        },
+        "osProfile": {
+          "computername": "[parameters('adPDCVMName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[parameters('adImagePublisher')]",
+            "offer": "[parameters('adImageOffer')]",
+            "sku": "[parameters('adImageSKU')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "osdisk",
+            "vhd": {
+              "uri": "[concat('http://',variables('mainAdStorageName'),'.blob.core.windows.net/',parameters('vmContainerName'),'/',parameters('adPDCVMName'),'-osdisk.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          },
+          "dataDisks": [
+            {
+              "vhd": {
+                "uri": "[concat('http://',variables('mainAdStorageName'),'.blob.core.windows.net/',parameters('vmContainerName'),'/', parameters('adPDCVMName'),'data-1.vhd')]"
+              },
+              "name": "[concat(parameters('adPDCVMName'),'-data-disk1')]",
+              "createOption": "empty",
+              "caching": "None",
+              "diskSizeGB": 128,
+              "lun": 0
+            }
+          ]
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId(resourceGroup().name,'Microsoft.Network/networkInterfaces',parameters('adPDCNicName'))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": "true",
+            "storageUri": "[concat('http://',variables('mainDiagstorageName'),'.blob.core.windows.net')]"
+          }
+        }
+      },
+      "resources": [
+        {
+          "type": "Microsoft.Compute/virtualMachines/extensions",
+          "name": "[concat(parameters('adPDCVMName'),'/InstallDomainController')]",
+          "apiVersion": "2015-06-15",
+          "location": "[parameters('mainLocation')]",
+          "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines', parameters('adPDCVMName'))]"
+          ],
+          "properties": {
+            "publisher": "Microsoft.Powershell",
+            "type": "DSC",
+            "typeHandlerVersion": "2.19",
+            "autoUpgradeMinorVersion": false,
+            "settings": {
+              "modulesURL": "[parameters('adPDCModulesURL')]",
+              "configurationFunction": "[parameters('adPDCConfigurationFunction')]",
+              "properties": {
+                "domainName": "[parameters('domainName')]",
+                "adminCreds": {
+                  "userName": "[parameters('adminUserName')]",
+                  "password": "PrivateSettingsRef:adminPassword"
+                }
+              }
+            },
+            "protectedSettings": {
+              "items": {
+                "adminPassword": "[parameters('adminPassword')]"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[parameters('adBDCVMName')]",
+      "location": "[parameters('drLocation')]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/availabilitySets/',variables('drAvSetName'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('adVMSize')]"
+        },
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('drAvSetName'))]"
+        },
+        "osProfile": {
+          "computername": "[parameters('adBDCVMName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[parameters('adImagePublisher')]",
+            "offer": "[parameters('adImageOffer')]",
+            "sku": "[parameters('adImageSKU')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "osdisk",
+            "vhd": {
+              "uri": "[concat('http://',variables('drAdStorageName'),'.blob.core.windows.net/',parameters('vmContainerName'),'/',parameters('adBDCVMName'),'-osdisk.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          },
+          "dataDisks": [
+            {
+              "vhd": {
+                "uri": "[concat('http://',variables('drAdStorageName'),'.blob.core.windows.net/',parameters('vmContainerName'),'/', parameters('adBDCVMName'),'data-1.vhd')]"
+              },
+              "name": "[concat(parameters('adBDCVMName'),'-data-disk1')]",
+              "createOption": "empty",
+              "caching": "None",
+              "diskSizeGB": 128,
+              "lun": 0
+            }
+          ]
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId(resourceGroup().name,'Microsoft.Network/networkInterfaces',parameters('adBDCNicName'))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": "true",
+            "storageUri": "[concat('http://',variables('drDiagstorageName'),'.blob.core.windows.net')]"
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}
