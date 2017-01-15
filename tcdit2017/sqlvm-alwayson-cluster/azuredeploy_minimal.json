@@ -769,13 +769,6 @@
           "adPDCNicName": {
             "value": "[variables('adPDCNicName')]"
           },
-<<<<<<< HEAD
-          "adPDCNICIPAddress": {
-=======
-          "adPCDNICIPAddress": {
->>>>>>> master
-            "value": "10.0.0.4"
-          },
           "domainName": {
             "value": "[parameters('domainName')]"
           },
@@ -785,42 +778,11 @@
           "adPDCModulesURL": {
             "value": "[variables('configuration').adPDCModulesURL]"
           },
-          "adBDCConfigurationFunction": {
-            "value": "[variables('configuration').adBDCConfigurationFunction]"
-          },
-          "adBDCModulesURL": {
-            "value": "[variables('configuration').adBDCModulesURL]"
-          },
           "adBDCVMName": {
             "value": "[variables('vmSettings').adBDCVMName]"
           },
           "adBDCNicName": {
             "value": "[variables('adBDCNicName')]"
-          },
-<<<<<<< HEAD
-          "adBDCNICIPAddress": {
-=======
-          "adBCDNICIPAddress": {
->>>>>>> master
-            "value": "172.16.0.5"
-          },
-          "mainVnetName": {
-            "value": "[variables('mainVirtualNetworkName')]"
-          },
-          "mainVnetAddressSpace": {
-            "value": "[parameters('mainVirtualNetworkAddressRange')]"
-          },
-          "mainVnetSubnets": {
-            "value": "[variables('mainSubnets')]"
-          },
-          "drVnetName": {
-            "value": "[variables('drVirtualNetworkName')]"
-          },
-          "drVnetAddressSpace": {
-            "value": "[parameters('drVirtualNetworkAddressRange')]"
-          },
-          "drVnetSubnets": {
-            "value": "[variables('drSubnets')]"
           }
         }
       }
