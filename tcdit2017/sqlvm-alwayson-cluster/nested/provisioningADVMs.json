@@ -73,19 +73,27 @@
     "drDiagstorageName": "[concat(parameters('diagStorageAccountName'),parameters('drLocationPrefix'))]",
     "mainAvSetName": "[concat(parameters('AdAvailabilitySetName'),parameters('mainLocationPrefix'))]",
     "drAvSetName": "[concat(parameters('AdAvailabilitySetName'),parameters('drLocationPrefix'))]"
-  },
+  }, 
   "resources": [
     {
       "type": "Microsoft.Compute/availabilitySets",
       "name": "[variables('mainAvSetName')]",
       "apiVersion": "2015-06-15",
-      "location": "[parameters('mainLocation')]"
+      "location": "[parameters('mainLocation')]",
+      "properties": {
+        "platformFaultDomainCount": 3,
+        "platformUpdateDomainCount": 5
+      }
     },
     {
       "type": "Microsoft.Compute/availabilitySets",
       "name": "[variables('drAvSetName')]",
       "apiVersion": "2015-06-15",
-      "location": "[parameters('drLocation')]"
+      "location": "[parameters('drLocation')]",
+      "properties": {
+        "platformFaultDomainCount": 3,
+        "platformUpdateDomainCount": 5
+      }
     },
     {
       "apiVersion": "2015-06-15",
@@ -103,7 +111,7 @@
           "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('mainAvSetName'))]"
         },
         "osProfile": {
-          "computername": "[parameters('adPDCVMName')]",
+          "computerName": "[parameters('adPDCVMName')]",
           "adminUsername": "[parameters('adminUsername')]",
           "adminPassword": "[parameters('adminPassword')]"
         },
@@ -128,9 +136,9 @@
                 "uri": "[concat('http://',variables('mainAdStorageName'),'.blob.core.windows.net/',parameters('vmContainerName'),'/', parameters('adPDCVMName'),'data-1.vhd')]"
               },
               "name": "[concat(parameters('adPDCVMName'),'-data-disk1')]",
-              "createOption": "empty",
+              "createOption": "Empty",
               "caching": "None",
-              "diskSizeGB": 128,
+              "diskSizeGB": "128",
               "lun": 0
             }
           ]
@@ -199,7 +207,7 @@
           "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('drAvSetName'))]"
         },
         "osProfile": {
-          "computername": "[parameters('adBDCVMName')]",
+          "computerName": "[parameters('adBDCVMName')]",
           "adminUsername": "[parameters('adminUsername')]",
           "adminPassword": "[parameters('adminPassword')]"
         },
@@ -224,9 +232,9 @@
                 "uri": "[concat('http://',variables('drAdStorageName'),'.blob.core.windows.net/',parameters('vmContainerName'),'/', parameters('adBDCVMName'),'data-1.vhd')]"
               },
               "name": "[concat(parameters('adBDCVMName'),'-data-disk1')]",
-              "createOption": "empty",
+              "createOption": "Empty",
               "caching": "None",
-              "diskSizeGB": 128,
+              "diskSizeGB": "128",
               "lun": 0
             }
           ]

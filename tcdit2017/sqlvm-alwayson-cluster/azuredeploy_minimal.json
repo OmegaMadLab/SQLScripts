@@ -39,25 +39,33 @@
       },
       "defaultValue": "East US"
     },
-    "mainResPrefix": {
+    "environmentPrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "Common prefix which will compose the name of all the resource group resources"
+      },
+      "defaultValue": "hademo"
+    },
+    "mainResSuffix": {
       "type": "string",
       "metadata": {
         "description": "Prefix for main datacenter resources which are created with fixed names"
       },
-      "defaultValue": "mainDC"
+      "defaultValue": "main"
     },
-    "drResPrefix": {
+    "drResSuffix": {
       "type": "string",
       "metadata": {
         "description": "Prefix for DR datacenter resources which are created with fixed names"
       },
-      "defaultValue": "drDC"
+      "defaultValue": "dr"
     },
     "sqlStorageAccountName": {
       "type": "string",
       "metadata": {
         "description": "The name of Sql Server Storage Account"
-      }
+      },
+      "defaultValue": "sqlsa"
     },
     "sqlStorageAccountType": {
       "type": "string",
@@ -72,13 +80,14 @@
       },
       "defaultValue": "Standard_LRS"
     },
-    "dcStorageAccountName": {
+    "adStorageAccountName": {
       "type": "string",
       "metadata": {
         "description": "The name of DC Storage Account"
-      }
+      },
+      "defaultValue": "adsa"
     },
-    "dcStorageAccountType": {
+    "adStorageAccountType": {
       "type": "string",
       "allowedValues": [
         "Standard_LRS",
@@ -95,13 +104,15 @@
       "type": "string",
       "metadata": {
         "description": "The name of File Server Storage Account"
-      }
+      },
+      "defaultValue": "fswsa"
     },
     "diagStorageAccountName": {
       "type": "string",
       "metadata": {
         "description": "The name of diagnostic Storage Account"
-      }
+      },
+      "defaultValue": "diagsa"
     },
     "mainVirtualNetworkAddressRange": {
       "type": "string",
@@ -194,6 +205,52 @@
     },
     "defaultValue": "172.16.1.9"
     },
+    "adVMSize": {
+      "type": "string",
+      "allowedValues": [
+        "Standard_D1_v2",
+        "Standard_D2_v2",
+        "Standard_D3_v2",
+        "Standard_D4_v2",
+        "Standard_D5_v2",
+        "Standard_D1",
+        "Standard_D2",
+        "Standard_D3",
+        "Standard_D4",
+        "Standard_DS1",
+        "Standard_DS2",
+        "Standard_DS3",
+        "Standard_DS4",
+        "Standard_DS1_v2",
+        "Standard_DS2_v2",
+        "Standard_DS3_v2",
+        "Standard_DS4_v2",
+        "Standard_DS5_v2"
+      ],
+      "metadata": {
+        "description": "The size of the AD VMs Created"
+      },
+      "defaultValue": "Standard_D1_v2"
+    },
+    "domainName": {
+      "type": "string",
+      "metadata": {
+        "description": "The FQDN of the AD Domain created "
+      },
+      "defaultValue": "contoso.local"
+    },
+    "adminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the Administrator of the new VMs and Domain"
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The password for the Administrator account of the new VMs and Domain"
+      }
+    },
     "numberOfSqlVMDisks": {
       "type": "string",
       "allowedValues": [
@@ -213,10 +270,8 @@
       "staticSubnetName": "staticSubnet",
       "sqlSubnetName": "sqlSubnet"
     },
-    "primaryDCIPAddressName": "mainDCIP",
-    "backupDCIPAddressName": "drDCIP",
-    "mainVirtualNetworkName": "[concat(parameters('mainResPrefix'),'VNET')]",
-    "drVirtualNetworkName": "[concat(parameters('drResPrefix'),'VNET')]",
+    "mainVirtualNetworkName": "[concat(parameters('environmentPrefix'),'-VNET-',parameters('mainResSuffix'))]",
+    "drVirtualNetworkName": "[concat(parameters('environmentPrefix'),'-VNET-',parameters('drResSuffix'))]",
     "mainSubnets": [
       {
         "name": "[variables('subnetNames').staticSubnetName]",
@@ -257,20 +312,20 @@
         }
       }
     ],
-    "mainGWName": "[concat(parameters('mainResPrefix'),'VnetGW')]",
-    "drGWName": "[concat(parameters('drResPrefix'),'VnetGW')]",
-    "mainVnetConnectionName": "[concat(parameters('mainResPrefix'), '2', parameters('drResPrefix'))]",
-    "drVnetConnectionName": "[concat(parameters('drResPrefix'), '2', parameters('mainResPrefix'))]",
-    "mainGWPublicIPName": "[concat(parameters('mainResPrefix'),'VnetGWip')]",
-    "drGWPublicIPName": "[concat(parameters('drResPrefix'),'VnetGWip')]",
+    "mainGWName": "[concat(parameters('environmentPrefix'),'-VnetGW-',parameters('mainResSuffix'))]",
+    "drGWName": "[concat(parameters('environmentPrefix'),'-VnetGW-',parameters('drResSuffix'))]",
+    "mainVnetConnectionName": "[concat(parameters('environmentPrefix'),'-Conn-',parameters('mainResSuffix'), '2', parameters('drResSuffix'))]",
+    "drVnetConnectionName": "[concat(parameters('environmentPrefix'),'-Conn-',parameters('drResSuffix'), '2', parameters('mainResSuffix'))]",
+    "mainGWPublicIPName": "[concat(parameters('environmentPrefix'),'-VnetGWip-',parameters('mainResSuffix'))]",
+    "drGWPublicIPName": "[concat(parameters('environmentPrefix'),'-VnetGWip-',parameters('drResSuffix'))]",
     "lbSettings": {
       "rdpLBFE": "rdpLBFE",
-      "mainSqlLBFE": "[concat(parameters('mainResPrefix'),'-sqlLBFE')]",
-      "drSqlLBFE": "[concat(parameters('drResPrefix'),'-sqlLBFE')]",
-      "mainSqlLBBE": "[concat(parameters('mainResPrefix'),'-sqlLBBE')]",
-      "drSqlLBBE": "[concat(parameters('drResPrefix'),'-sqlLBBE')]",
-      "mainSqlLBName": "[concat(parameters('mainResPrefix'),'-sqlLoadBalancer')]",
-      "drSqlLBName": "[concat(parameters('drResPrefix'),'-sqlLoadBalancer')]"
+      "mainSqlLBFE": "[concat(parameters('environmentPrefix'),'-sqlLBFE-',parameters('mainResSuffix'))]",
+      "drSqlLBFE": "[concat(parameters('environmentPrefix'),'-sqlLBFE-',parameters('drResSuffix'))]",
+      "mainSqlLBBE": "[concat(parameters('environmentPrefix'),'-sqlLBBE-',parameters('mainResSuffix'))]",
+      "drSqlLBBE": "[concat(parameters('environmentPrefix'),'-sqlLBBE-',parameters('drResSuffix'))]",
+      "mainSqlLBName": "[concat(parameters('environmentPrefix'),'-sqlLoadBalancer-',parameters('mainResSuffix'))]",
+      "drSqlLBName": "[concat(parameters('environmentPrefix'),'-sqlLoadBalancer-',parameters('drResSuffix'))]"
     },
     "mainVnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('mainVirtualNetworkName'))]",
     "mainStaticSubnetRef": "[concat(variables('mainVnetID'),'/subnets/',variables('subnetNames').staticSubnetName)]",
@@ -286,22 +341,22 @@
     "derivedIds": {
       "mainSqlBEAddressPoolID": "[concat(variables('ids').mainSqllbID,'/backendAddressPools/',variables('lbSettings').mainSqlLBBE)]",
       "mainSqllbFEConfigID": "[concat(variables('ids').mainSqllbID,'/frontendIPConfigurations/',variables('lbSettings').mainSqlLBFE)]",
-      "mainSqllbProbeID": "[concat(variables('ids').mainSqllbID,'/probes/',concat(parameters('mainResPrefix'),'-',variables('SQLAOProbe')))]",
+      "mainSqllbProbeID": "[concat(variables('ids').mainSqllbID,'/probes/',parameters('environmentPrefix'),'-',variables('SQLAOProbe'),'-',parameters('mainResSuffix'))]",
       "drSqlBEAddressPoolID": "[concat(variables('ids').drSqllbID,'/backendAddressPools/',variables('lbSettings').drSqlLBBE)]",
       "drSqllbFEConfigID": "[concat(variables('ids').drSqllbID,'/frontendIPConfigurations/',variables('lbSettings').drSqlLBFE)]",
-      "drSqllbProbeID": "[concat(variables('ids').drSqllbID,'/probes/',concat(parameters('drResPrefix'),'-',variables('SQLAOProbe')))]"
+      "drSqllbProbeID": "[concat(variables('ids').mainSqllbID,'/probes/',parameters('environmentPrefix'),'-',variables('SQLAOProbe'),'-',parameters('drResSuffix'))]"
     },
     "vmSettings": {
       "availabilitySets": {
-        "sqlAvailabilitySetName": "sqlAvailabilitySet",
-        "adAvailabilitySetName": "adAvailabilitySet"
+        "sqlAvailabilitySetName": "SqlAvailabilitySet",
+        "adAvailabilitySetName": "AdAvailabilitySet"
       },
-      "noOfSqlVMs": 3,
       "vmContainerName": "vhds",
-      "adPDCVMName": "ad-primary-dc",
-      "adBDCVMName": "ad-secondary-dc",
-      "sqlVMName": "sqlserver-",
-      "sqlwVMName": "cluster-fsw",
+      "adPDCVMName": "[concat(parameters('environmentPrefix'),'-addc-',parameters('mainResSuffix'))]",
+      "adBDCVMName": "[concat(parameters('environmentPrefix'),'-addc-',parameters('drResSuffix'))]",
+      "mainSqlVMName": "[concat(parameters('environmentPrefix'),'-sql-',parameters('mainResSuffix'))]",
+      "drSqlVMName": "[concat(parameters('environmentPrefix'),'-sql-',parameters('drResSuffix'))]",
+      "sqlwVMName": "[concat(parameters('environmentPrefix'),'-fsw-',parameters('mainResSuffix'))]",
       "windowsImagePublisher": "MicrosoftWindowsServer",
       "windowsImageOffer": "WindowsServer",
       "windowsImageSKU": "2012-R2-Datacenter",
@@ -315,9 +370,9 @@
     "sqlwNicName": "[concat(variables('vmSettings').sqlwVMName,'-nic')]",
     "primaryDCIPAddressNameWithSuffix": "[concat(variables('vmSettings').adPDCVMName,'-ip')]",
     "backupDCIPAddressNameWithSuffix": "[concat(variables('vmSettings').adBDCVMName,'-ip')]",
-    "sql0AddressNameWithSuffix": "[concat(variables('vmSettings').sqlVMName,'0-ip')]",
-    "sql1AddressNameWithSuffix": "[concat(variables('vmSettings').sqlVMName,'1-ip')]",
-    "sql2AddressNameWithSuffix": "[concat(variables('vmSettings').sqlVMName,'2-ip')]",
+    "sql0AddressNameWithSuffix": "[concat(variables('vmSettings').mainSqlVMName,'0-ip')]",
+    "sql1AddressNameWithSuffix": "[concat(variables('vmSettings').mainSqlVMName,'1-ip')]",
+    "sql2AddressNameWithSuffix": "[concat(variables('vmSettings').drSqlVMName,'0-ip')]",
     "configuration": {
       "vnet2vnetTemplateURL": "[concat(parameters('templatesBaseUrl'),'/vnet2vnet.json')]",
       "vnetwithDNSTemplateURL": "[concat(parameters('templatesBaseUrl'),'/vnet-with-dns-server.json')]",
@@ -327,7 +382,7 @@
       "setupLBsUrl": "[concat(parameters('templatesBaseUrl'),'/setupLBs.json')]",
       "creatingNicsUrl": "[concat(parameters('templatesBaseUrl'),'/creatingNICS.json')]",
       "storageAccountVirtualNetworkPublicIP": "[concat(parameters('templatesBaseUrl'),'/storageAccountVirtualNetworkPublicIP.json')]",
-      "provisioningVMs": "[concat(parameters('templatesBaseUrl'),'/provisioningVM',parameters('numberOfSqlVMDisks'),'.json')]",
+      "provisioningADVMs": "[concat(parameters('templatesBaseUrl'),'/provisioningADVMs.json')]",
       "configuringBackupADVM": "[concat(parameters('templatesBaseUrl'),'/configuringBackupADVM.json')]",
       "preparingAlwaysOnSqlServer": "[concat(parameters('templatesBaseUrl'),'/preparingSqlServer.json')]",
       "configuringAlwaysOn": "[concat(parameters('templatesBaseUrl'),'/configuringAlwaysOn.json')]",
@@ -360,22 +415,22 @@
             "value": "[parameters('mainDCLocation')]"
           },
           "sqlStorageAccountName": {
-            "value": "[concat(parameters('sqlStorageAccountName'),'main')]"
+            "value": "[concat(parameters('environmentPrefix'),parameters('sqlStorageAccountName'),parameters('mainResSuffix'))]"
           },
-          "dcStorageAccountName": {
-            "value": "[concat(parameters('dcStorageAccountName'),'main')]"
+          "adStorageAccountName": {
+            "value": "[concat(parameters('environmentPrefix'),parameters('adStorageAccountName'),parameters('mainResSuffix'))]"
           },
           "fswStorageAccountName": {
-            "value": "[concat(parameters('fswStorageAccountName'),'main')]"
+            "value": "[concat(parameters('environmentPrefix'),parameters('fswStorageAccountName'),parameters('mainResSuffix'))]"
           },
           "diagStorageAccountName": {
-            "value": "[concat(parameters('diagStorageAccountName'),'main')]"
+            "value": "[concat(parameters('environmentPrefix'),parameters('diagStorageAccountName'),parameters('mainResSuffix'))]"
           },
           "SqlStorageAccountType": {
             "value": "[parameters('sqlStorageAccountType')]"
           },
-          "DcStorageAccountType": {
-            "value": "[parameters('dcStorageAccountType')]"
+          "adStorageAccountType": {
+            "value": "[parameters('adStorageAccountType')]"
           },
           "DCIPAddressNameWithSuffix": {
             "value": "[variables('primaryDCIPAddressNameWithSuffix')]"
@@ -408,22 +463,22 @@
             "value": "[parameters('drDCLocation')]"
           },
           "sqlStorageAccountName": {
-            "value": "[concat(parameters('sqlStorageAccountName'),'dr')]"
+            "value": "[concat(parameters('environmentPrefix'),parameters('sqlStorageAccountName'),parameters('drResSuffix'))]"
           },
-          "dcStorageAccountName": {
-            "value": "[concat(parameters('dcStorageAccountName'),'dr')]"
+          "adStorageAccountName": {
+            "value": "[concat(parameters('environmentPrefix'),parameters('adStorageAccountName'),parameters('drResSuffix'))]"
           },
           "fswStorageAccountName": {
-            "value": "[concat(parameters('fswStorageAccountName'),'dr')]"
+            "value": "[concat(parameters('environmentPrefix'),parameters('fswStorageAccountName'),parameters('drResSuffix'))]"
           },
           "diagStorageAccountName": {
-            "value": "[concat(parameters('diagStorageAccountName'),'dr')]"
+            "value": "[concat(parameters('environmentPrefix'),parameters('diagStorageAccountName'),parameters('drResSuffix'))]"
           },
           "SqlStorageAccountType": {
             "value": "[parameters('sqlStorageAccountType')]"
           },
-          "DcStorageAccountType": {
-            "value": "[parameters('dcStorageAccountType')]"
+          "adStorageAccountType": {
+            "value": "[parameters('adStorageAccountType')]"
           },
           "DCIPAddressNameWithSuffix": {
             "value": "[variables('backupDCIPAddressNameWithSuffix')]"
@@ -532,7 +587,7 @@
             "value": "[variables('derivedIds').mainSqllbProbeID]"
           },
           "SQLAOProbe": {
-            "value": "[concat(parameters('mainResPrefix'),'-',variables('SQLAOProbe'))]"
+            "value": "[concat(parameters('environmentPrefix'),'-',variables('SQLAOProbe'),'-',parameters('mainResSuffix'))]"
           }
         }
       }
@@ -580,7 +635,7 @@
             "value": "[variables('derivedIds').drSqllbProbeID]"
           },
           "SQLAOProbe": {
-            "value": "[concat(parameters('drResPrefix'),'-',variables('SQLAOProbe'))]"
+            "value": "[concat(parameters('environmentPrefix'),'-',variables('SQLAOProbe'),'-',parameters('drResSuffix'))]"
           }
         }
       }
@@ -624,11 +679,14 @@
           "adBDCNICIPAddress": {
             "value": "[parameters('adBDCNICIPAddress')]"
           },
-          "sqlVMName": {
-            "value": "[variables('vmSettings').sqlVMName]"
+          "mainSqlVMName": {
+            "value": "[variables('vmSettings').mainSqlVMName]"
           },
           "mainSqlSubnetRef": {
             "value": "[variables('mainSqlSubnetRef')]"
+          },
+          "drSqlVMName": {
+            "value": "[variables('vmSettings').drSqlVMName]"
           },
           "drSqlSubnetRef": {
             "value": "[variables('drSqlSubnetRef')]"
@@ -656,6 +714,86 @@
           },
           "sql2AddressNameWithSuffix": {
             "value": "[variables('sql2AddressNameWithSuffix')]"
+          }
+        }
+      }
+    },
+    {
+      "name": "ProvisioningADVMs",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [
+        "Microsoft.Resources/deployments/CreatingNetworkInterfaces"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('configuration').provisioningADVMs]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "mainLocation": {
+            "value": "[parameters('mainDCLocation')]"
+          },
+          "drLocation": {
+            "value": "[parameters('drDCLocation')]"
+          },
+          "mainLocationSuffix": {
+            "value": "[parameters('mainResSuffix')]"
+          },
+          "drLocationSuffix": {
+            "value": "[parameters('drResSuffix')]"
+          },
+          "adPDCVMName": {
+            "value": "[variables('vmSettings').adPDCVMName]"
+          },
+          "adAvailabilitySetName": {
+            "value": "[variables('vmSettings').availabilitySets.adAvailabilitySetName]"
+          },
+          "adStorageAccountName": {
+            "value": "[parameters('adStorageAccountName')]"
+          },
+          "diagStorageAccountName": {
+            "value": "[parameters('diagStorageAccountName')]"
+          },
+          "adVMSize": {
+            "value": "[parameters('adVMSize')]"
+          },
+          "adminUsername": {
+            "value": "[parameters('adminUsername')]"
+          },
+          "adminPassword": {
+            "value": "[parameters('adminPassword')]"
+          },
+          "adImagePublisher": {
+            "value": "[variables('vmSettings').windowsImagePublisher]"
+          },
+          "adImageOffer": {
+            "value": "[variables('vmSettings').windowsImageOffer]"
+          },
+          "adImageSKU": {
+            "value": "[variables('vmSettings').windowsImageSKU]"
+          },
+          "vmContainerName": {
+            "value": "[variables('vmSettings').vmContainerName]"
+          },
+          "adPDCNicName": {
+            "value": "[variables('adPDCNicName')]"
+          },
+          "domainName": {
+            "value": "[parameters('domainName')]"
+          },
+          "adPDCConfigurationFunction": {
+            "value": "[variables('configuration').adPDCConfigurationFunction]"
+          },
+          "adPDCModulesURL": {
+            "value": "[variables('configuration').adPDCModulesURL]"
+          },
+          "adBDCVMName": {
+            "value": "[variables('vmSettings').adBDCVMName]"
+          },
+          "adBDCNicName": {
+            "value": "[variables('adBDCNicName')]"
           }
         }
       }

@@ -8,29 +8,32 @@
         "drDCLocation":{
             "value":"East US"
         },
-        "mainResPrefix":{
-            "value":"mainDC"
+        "environmentPrefix":{
+            "value":"mo"
         },
-        "drResPrefix":{
-            "value":"drDC"
+        "mainResSuffix":{
+            "value":"main"
+        },
+        "drResSuffix":{
+            "value":"dr"
         },
         "sqlStorageAccountType":{  
             "value":"Standard_LRS"
         },
-        "dcStorageAccountType":{  
+        "adStorageAccountType":{  
             "value":"Standard_LRS"
         },
         "sqlStorageAccountName":{  
-            "value":"mosqlsa"
+            "value":"sqlsa"
         },
-        "dcStorageAccountName":{  
-            "value":"modcsa"
+        "adStorageAccountName":{  
+            "value":"adsa"
         },
         "fswStorageAccountName":{  
-            "value":"mofswsa"
+            "value":"fswsa"
         },
         "diagStorageAccountName":{  
-            "value":"modiagsa"
+            "value":"diagsa"
         },
         "mainVirtualNetworkAddressRange":{  
             "value":"10.0.0.0/16"
@@ -70,6 +73,15 @@
         },
         "adBDCNICIPAddress":{
             "value": "172.16.0.5"
+        },
+        "domainName":{
+            "value": "tcdit17demo.local"
+        },
+        "adminUsername":{  
+         "value":"sjadmin"
+        },
+        "adminPassword":{  
+            "value":"Passw0rd"
         }
     }
 }

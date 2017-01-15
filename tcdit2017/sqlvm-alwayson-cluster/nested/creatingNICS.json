@@ -26,7 +26,10 @@
     "adBDCNICIPAddress": {
       "type": "string"
     },
-    "sqlVMName": {
+    "mainSqlVMName": {
+      "type": "string"
+    },
+    "drSqlVMName": {
       "type": "string"
     },
     "mainSqlSubnetRef": {
@@ -48,15 +51,6 @@
       "type": "string"
     },
     "backupDCIPAddressNameWithSuffix": {
-      "type": "string"
-    },
-    "sql0AddressNameWithSuffix": {
-      "type": "string"
-    },
-     "sql1AddressNameWithSuffix": {
-      "type": "string"
-    },
-     "sql2AddressNameWithSuffix": {
       "type": "string"
     }
   },
@@ -108,7 +102,7 @@
       }
     },
     {
-      "name": "[concat(parameters('sqlVMName'),'0-nic')]",
+      "name": "[concat(parameters('mainSqlVMName'),'0-nic')]",
       "type": "Microsoft.Network/networkInterfaces",
       "location": "[parameters('mainLocation')]",
       "apiVersion": "2015-06-15",
@@ -132,7 +126,7 @@
       }
     },
     {
-      "name": "[concat(parameters('sqlVMName'),'1-nic')]",
+      "name": "[concat(parameters('mainSqlVMName'),'1-nic')]",
       "type": "Microsoft.Network/networkInterfaces",
       "location": "[parameters('mainLocation')]",
       "apiVersion": "2015-06-15",
@@ -156,7 +150,7 @@
       }
     },
     {
-      "name": "[concat(parameters('sqlVMName'),'2-nic')]",
+      "name": "[concat(parameters('drSqlVMName'),'0-nic')]",
       "type": "Microsoft.Network/networkInterfaces",
       "location": "[parameters('drLocation')]",
       "apiVersion": "2015-06-15",
