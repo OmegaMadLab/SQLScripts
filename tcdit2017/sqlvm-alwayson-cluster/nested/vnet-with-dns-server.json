@@ -18,8 +18,7 @@
       "type": "string",
       "metadata": {
         "description": "The address range of the VNET in CIDR format"
-      },
-      "defaultValue": "10.0.0.0/16"
+      }
     },
     "subnets": {
       "type": "array",
