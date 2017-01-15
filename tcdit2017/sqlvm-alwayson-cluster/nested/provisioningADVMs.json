@@ -38,6 +38,9 @@
     "adPDCNicName": {
       "type": "string"
     },
+    "adPDCNICIPAddress": {
+      "type": "string"
+    },
     "adPDCConfigurationFunction": {
       "type": "string"
     },
@@ -48,6 +51,9 @@
       "type": "string"
     },
     "adBDCNicName": {
+      "type": "string"
+    },
+    "adBDCNICIPAddress": {
       "type": "string"
     },
     "mainAdStorageAccountName": {
@@ -67,6 +73,24 @@
     },
     "domainName": {
       "type": "string"
+    },
+    "mainVnetName": {
+      "type": "string"
+    },
+    "mainVnetAddressSpace": {
+      "type": "string"
+    },
+    "mainVnetSubnets": {
+      "type": "array"
+    },
+    "drVnetName": {
+      "type": "string"
+    },
+    "drVnetAddressSpace": {
+      "type": "string"
+    },
+    "drVnetSubnets": {
+      "type": "array"
     }
   }, 
   "resources": [
@@ -185,6 +209,26 @@
           }
         }
       ]
+    },
+    {
+      "name": "[parameters('mainVnetName')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "location": "[parameters('mainLocation')]",
+      "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/',parameters('adPDCVMName'),'/extensions/InstallDomainController')]"
+          ],
+      "apiVersion": "2015-06-15",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[parameters('mainVnetAddressSpace')]"
+          ]
+        },
+        "dhcpOptions": {
+          "dnsServers": "[parameters('DNSServerAddress')]"
+        },
+        "subnets": "[parameters('mainVnetSubnets')]"
+      }
     },
     {
       "apiVersion": "2015-06-15",

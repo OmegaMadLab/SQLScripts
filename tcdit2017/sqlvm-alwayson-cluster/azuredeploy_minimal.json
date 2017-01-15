@@ -71,8 +71,6 @@
       "type": "string",
       "allowedValues": [
         "Standard_LRS",
-        "Standard_GRS",
-        "Standard_RAGRS",
         "Premium_LRS"
       ],
       "metadata": {
@@ -726,23 +724,26 @@
           "drLocation": {
             "value": "[parameters('drDCLocation')]"
           },
-          "mainLocationSuffix": {
-            "value": "[parameters('mainResSuffix')]"
-          },
-          "drLocationSuffix": {
-            "value": "[parameters('drResSuffix')]"
-          },
           "adPDCVMName": {
             "value": "[variables('vmSettings').adPDCVMName]"
           },
-          "adAvailabilitySetName": {
-            "value": "[variables('vmSettings').availabilitySets.adAvailabilitySetName]"
+          "mainAdAvailabilitySetName": {
+            "value": "[concat(parameters('environmentPrefix'),'-',variables('vmSettings').availabilitySets.adAvailabilitySetName,'-',parameters('mainResSuffix'))]"
           },
-          "adStorageAccountName": {
-            "value": "[parameters('adStorageAccountName')]"
+          "drAdAvailabilitySetName": {
+            "value": "[concat(parameters('environmentPrefix'),'-',variables('vmSettings').availabilitySets.adAvailabilitySetName,'-',parameters('drResSuffix'))]"
           },
-          "diagStorageAccountName": {
-            "value": "[parameters('diagStorageAccountName')]"
+          "mainAdStorageAccountName": {
+            "value": "[concat(parameters('environmentPrefix'),parameters('adStorageAccountName'),parameters('mainResSuffix'))]"
+          },
+          "drAdStorageAccountName": {
+            "value": "[concat(parameters('environmentPrefix'),parameters('adStorageAccountName'),parameters('drResSuffix'))]"
+          },
+          "mainDiagStorageAccountName": {
+            "value": "[concat(parameters('environmentPrefix'),parameters('diagStorageAccountName'),parameters('mainResSuffix'))]"
+          },
+          "drDiagStorageAccountName": {
+            "value": "[concat(parameters('environmentPrefix'),parameters('diagStorageAccountName'),parameters('drResSuffix'))]"
           },
           "adVMSize": {
             "value": "[parameters('adVMSize')]"
@@ -768,6 +769,9 @@
           "adPDCNicName": {
             "value": "[variables('adPDCNicName')]"
           },
+          "adPCDNICIPAddress": {
+            "value": "10.0.0.4"
+          },
           "domainName": {
             "value": "[parameters('domainName')]"
           },
@@ -777,11 +781,38 @@
           "adPDCModulesURL": {
             "value": "[variables('configuration').adPDCModulesURL]"
           },
+          "adBDCConfigurationFunction": {
+            "value": "[variables('configuration').adBDCConfigurationFunction]"
+          },
+          "adBDCModulesURL": {
+            "value": "[variables('configuration').adBDCModulesURL]"
+          },
           "adBDCVMName": {
             "value": "[variables('vmSettings').adBDCVMName]"
           },
           "adBDCNicName": {
             "value": "[variables('adBDCNicName')]"
+          },
+          "adBCDNICIPAddress": {
+            "value": "172.16.0.5"
+          },
+          "mainVnetName": {
+            "value": "[variables('mainVirtualNetworkName')]"
+          },
+          "mainVnetAddressSpace": {
+            "value": "[parameters('mainVirtualNetworkAddressRange')]"
+          },
+          "mainVnetSubnets": {
+            "value": "[variables('mainSubnets')]"
+          },
+          "drVnetName": {
+            "value": "[variables('drVirtualNetworkName')]"
+          },
+          "drVnetAddressSpace": {
+            "value": "[parameters('drVirtualNetworkAddressRange')]"
+          },
+          "drVnetSubnets": {
+            "value": "[variables('drSubnets')]"
           }
         }
       }
