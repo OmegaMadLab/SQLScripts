@@ -8,13 +8,10 @@
     "drLocation": {
       "type": "string"
     },
-    "mainLocationSuffix": {
+    "mainAdAvailabilitySetName": {
       "type": "string"
     },
-    "drLocationSuffix": {
-      "type": "string"
-    },
-    "AdAvailabilitySetName": {
+    "drAdAvailabilitySetName": {
       "type": "string"
     },
     "adVMSize": {
@@ -53,10 +50,16 @@
     "adBDCNicName": {
       "type": "string"
     },
-    "adStorageAccountName": {
+    "mainAdStorageAccountName": {
       "type": "string"
     },
-    "diagStorageAccountName": {
+    "mainDiagStorageAccountName": {
+      "type": "string"
+    },
+    "drAdStorageAccountName": {
+      "type": "string"
+    },
+    "drDiagStorageAccountName": {
       "type": "string"
     },
     "vmContainerName": {
@@ -65,19 +68,11 @@
     "domainName": {
       "type": "string"
     }
-  },
-  "variables": {
-    "mainADstorageName": "[concat(parameters('adStorageAccountName'),parameters('mainLocationSuffix'))]",
-    "drADstorageName": "[concat(parameters('adStorageAccountName'),parameters('drLocationSuffix'))]",
-    "mainDiagstorageName": "[concat(parameters('diagStorageAccountName'),parameters('mainLocationSuffix'))]",
-    "drDiagstorageName": "[concat(parameters('diagStorageAccountName'),parameters('drLocationSuffix'))]",
-    "mainAvSetName": "[concat(parameters('AdAvailabilitySetName'),parameters('mainLocationSuffix'))]",
-    "drAvSetName": "[concat(parameters('AdAvailabilitySetName'),parameters('drLocationSuffix'))]"
   }, 
   "resources": [
     {
       "type": "Microsoft.Compute/availabilitySets",
-      "name": "[variables('mainAvSetName')]",
+      "name": "[parameters('mainAdAvailabilitySetName')]",
       "apiVersion": "2015-06-15",
       "location": "[parameters('mainLocation')]",
       "properties": {
@@ -87,7 +82,7 @@
     },
     {
       "type": "Microsoft.Compute/availabilitySets",
-      "name": "[variables('drAvSetName')]",
+      "name": "[parameters('drAdAvailabilitySetName')]",
       "apiVersion": "2015-06-15",
       "location": "[parameters('drLocation')]",
       "properties": {
@@ -101,14 +96,14 @@
       "name": "[parameters('adPDCVMName')]",
       "location": "[parameters('mainLocation')]",
       "dependsOn": [
-        "[concat('Microsoft.Compute/availabilitySets/',variables('mainAvSetName'))]"
+        "[concat('Microsoft.Compute/availabilitySets/',parameters('mainAdAvailabilitySetName'))]"
       ],
       "properties": {
         "hardwareProfile": {
           "vmSize": "[parameters('adVMSize')]"
         },
         "availabilitySet": {
-          "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('mainAvSetName'))]"
+          "id": "[resourceId('Microsoft.Compute/availabilitySets',parameters('mainAdAvailabilitySetName'))]"
         },
         "osProfile": {
           "computerName": "[parameters('adPDCVMName')]",
@@ -125,7 +120,7 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat('http://',variables('mainAdStorageName'),'.blob.core.windows.net/',parameters('vmContainerName'),'/',parameters('adPDCVMName'),'-osdisk.vhd')]"
+              "uri": "[concat('http://',parameters('mainAdStorageAccountName'),'.blob.core.windows.net/',parameters('vmContainerName'),'/',parameters('adPDCVMName'),'-osdisk.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -133,7 +128,7 @@
           "dataDisks": [
             {
               "vhd": {
-                "uri": "[concat('http://',variables('mainAdStorageName'),'.blob.core.windows.net/',parameters('vmContainerName'),'/', parameters('adPDCVMName'),'data-1.vhd')]"
+                "uri": "[concat('http://',parameters('mainAdStorageAccountName'),'.blob.core.windows.net/',parameters('vmContainerName'),'/', parameters('adPDCVMName'),'data-1.vhd')]"
               },
               "name": "[concat(parameters('adPDCVMName'),'-data-disk1')]",
               "createOption": "Empty",
@@ -153,7 +148,7 @@
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",
-            "storageUri": "[concat('http://',variables('mainDiagstorageName'),'.blob.core.windows.net')]"
+            "storageUri": "[concat('http://',parameters('mainDiagStorageAccountName'),'.blob.core.windows.net')]"
           }
         }
       },
@@ -197,14 +192,14 @@
       "name": "[parameters('adBDCVMName')]",
       "location": "[parameters('drLocation')]",
       "dependsOn": [
-        "[concat('Microsoft.Compute/availabilitySets/',variables('drAvSetName'))]"
+        "[concat('Microsoft.Compute/availabilitySets/',parameters('drAdAvailabilitySetName'))]"
       ],
       "properties": {
         "hardwareProfile": {
           "vmSize": "[parameters('adVMSize')]"
         },
         "availabilitySet": {
-          "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('drAvSetName'))]"
+          "id": "[resourceId('Microsoft.Compute/availabilitySets',parameters('drAdAvailabilitySetName'))]"
         },
         "osProfile": {
           "computerName": "[parameters('adBDCVMName')]",
@@ -221,7 +216,7 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat('http://',variables('drAdStorageName'),'.blob.core.windows.net/',parameters('vmContainerName'),'/',parameters('adBDCVMName'),'-osdisk.vhd')]"
+              "uri": "[concat('http://',parameters('drAdStorageAccountName'),'.blob.core.windows.net/',parameters('vmContainerName'),'/',parameters('adBDCVMName'),'-osdisk.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -229,7 +224,7 @@
           "dataDisks": [
             {
               "vhd": {
-                "uri": "[concat('http://',variables('drAdStorageName'),'.blob.core.windows.net/',parameters('vmContainerName'),'/', parameters('adBDCVMName'),'data-1.vhd')]"
+                "uri": "[concat('http://',parameters('drAdStorageAccountName'),'.blob.core.windows.net/',parameters('vmContainerName'),'/', parameters('adBDCVMName'),'data-1.vhd')]"
               },
               "name": "[concat(parameters('adBDCVMName'),'-data-disk1')]",
               "createOption": "Empty",
@@ -249,7 +244,7 @@
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",
-            "storageUri": "[concat('http://',variables('drDiagstorageName'),'.blob.core.windows.net')]"
+            "storageUri": "[concat('http://',parameters('drDiagStorageAccountName'),'.blob.core.windows.net')]"
           }
         }
       }
