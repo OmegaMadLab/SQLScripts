@@ -9,7 +9,7 @@
             "value":"East US"
         },
         "environmentPrefix":{
-            "value":"mo2"
+            "value":"mo"
         },
         "mainResSuffix":{
             "value":"main"
@@ -82,6 +82,12 @@
         },
         "adminPassword":{  
             "value":"Passw0rd"
+        },
+        "adVMSize":{
+            "value":"Standard_D1_v2"
+        },
+        "witnessVMSize":{
+            "value":"Standard_D1_v2"
         }
     }
 }

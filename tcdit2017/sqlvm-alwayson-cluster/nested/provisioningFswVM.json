@@ -1,0 +1,165 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "adminUsername": {
+      "type": "string"
+    },
+    "adminPassword": {
+      "type": "securestring"
+    },
+    "location": {
+      "type": "string"
+    },
+    "sqlAvailabilitySetName": {
+      "type": "string"
+    },
+    "fswImagePublisher": {
+      "type": "string"
+    },
+    "fswImageOffer": {
+      "type": "string"
+    },
+    "fswImageSKU": {
+      "type": "string"
+    },
+    "vmContainerName": {
+      "type": "string"
+    },
+    "domainName": {
+      "type": "string"
+    },
+    "witnessVMSize": {
+      "type": "string"
+    },
+    "sqlwVMName": {
+      "type": "string"
+    },
+    "sqlwNicName": {
+      "type": "string"
+    },
+    "fswStorageName": {
+      "type": "string"
+    },
+    "diagStorageName": {
+      "type": "string"
+    },
+    "fswModulesURL":{  
+      "type":"string"
+    },
+    "fswConfigurationFunction":{  
+      "type":"string"
+    },
+    "sharePath":{  
+      "type":"string"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Compute/availabilitySets",
+      "name": "[parameters('sqlAvailabilitySetName')]",
+      "apiVersion": "2015-06-15",
+      "location": "[parameters('location')]",
+      "properties": {
+        "platformFaultDomainCount": 3,
+        "platformUpdateDomainCount": 5
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[parameters('sqlwVMName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/availabilitySets/',parameters('sqlAvailabilitySetName'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('witnessVMSize')]"
+        },
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets',parameters('sqlAvailabilitySetName'))]"
+        },
+        "osProfile": {
+          "computerName": "[parameters('sqlwVMName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[parameters('fswImagePublisher')]",
+            "offer": "[parameters('fswImageOffer')]",
+            "sku": "[parameters('fswImageSKU')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "osdisk",
+            "vhd": {
+              "uri": "[concat('http://',parameters('fswStorageName'),'.blob.core.windows.net/',parameters('vmContainerName'),'/',parameters('sqlwVMName'),'-osdisk.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          },
+          "dataDisks": [
+            {
+              "vhd": {
+                "uri": "[concat('http://',parameters('fswStorageName'),'.blob.core.windows.net/',parameters('vmContainerName'),'/', parameters('sqlwVMName'),'-data-1.vhd')]"
+              },
+              "name": "[concat(parameters('sqlwVMName'),'-data-disk1')]",
+              "caching": "None",
+              "createOption": "Empty",
+              "diskSizeGB": "128",
+              "lun": 0
+            }
+          ]
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId(resourceGroup().name,'Microsoft.Network/networkInterfaces',parameters('sqlwNicName'))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": "true",
+            "storageUri": "[concat('http://',parameters('diagStorageName'),'.blob.core.windows.net')]"
+          }
+        }
+      }
+    },
+    {  
+      "type":"Microsoft.Compute/virtualMachines/extensions",
+      "name":"[concat(parameters('sqlwVMName'),'/CreateFileShareWitness')]",
+      "apiVersion":"2015-06-15",
+      "location":"[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Compute/virtualMachines', parameters('sqlwVMName'))]"
+      ],
+      "properties":{  
+        "publisher":"Microsoft.Powershell",
+        "type":"DSC",
+        "typeHandlerVersion":"2.19",
+        "autoUpgradeMinorVersion":false,
+        "settings":{  
+            "modulesURL":"[parameters('fswModulesURL')]",
+            "configurationFunction":"[parameters('fswConfigurationFunction')]",
+            "properties":{  
+              "domainName":"[parameters('domainName')]",
+              "SharePath":"[parameters('sharePath')]",
+              "adminCreds":{  
+                  "userName":"[parameters('adminUserName')]",
+                  "password":"privateSettingsRef:adminPassword"
+              }
+            }
+        },
+        "protectedSettings":{  
+            "items":{  
+              "adminPassword":"[parameters('adminPassword')]"
+            }
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}
