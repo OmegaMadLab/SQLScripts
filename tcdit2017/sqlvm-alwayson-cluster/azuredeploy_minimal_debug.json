@@ -344,7 +344,7 @@
       "mainSqllbProbeID": "[concat(variables('ids').mainSqllbID,'/probes/',parameters('environmentPrefix'),'-',variables('SQLAOProbe'),'-',parameters('mainResSuffix'))]",
       "drSqlBEAddressPoolID": "[concat(variables('ids').drSqllbID,'/backendAddressPools/',variables('lbSettings').drSqlLBBE)]",
       "drSqllbFEConfigID": "[concat(variables('ids').drSqllbID,'/frontendIPConfigurations/',variables('lbSettings').drSqlLBFE)]",
-      "drSqllbProbeID": "[concat(variables('ids').mainSqllbID,'/probes/',parameters('environmentPrefix'),'-',variables('SQLAOProbe'),'-',parameters('drResSuffix'))]"
+      "drSqllbProbeID": "[concat(variables('ids').drSqllbID,'/probes/',parameters('environmentPrefix'),'-',variables('SQLAOProbe'),'-',parameters('drResSuffix'))]"
     },
     "vmSettings": {
       "availabilitySets": {
@@ -584,75 +584,6 @@
           },
           "SQLAOProbe": {
             "value": "[concat(parameters('environmentPrefix'),'-',variables('SQLAOProbe'),'-',parameters('drResSuffix'))]"
-          }
-        }
-      }
-    },
-    {
-      "name": "CreatingNetworkInterfaces",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
-      "dependsOn": [
-        "Microsoft.Resources/deployments/mainLoadBalancers",
-        "Microsoft.Resources/deployments/drLoadBalancers"
-      ],
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[variables('configuration').creatingNicsUrl]",
-          "contentVersion": "1.0.0.0"
-        },
-        "parameters": {
-          "mainLocation": {
-            "value": "[parameters('mainDCLocation')]"
-          },
-          "drLocation": {
-            "value": "[parameters('drDCLocation')]"
-          },
-          "adPDCNicName": {
-            "value": "[variables('adPDCNicName')]"
-          },
-          "adPDCNICIPAddress": {
-            "value": "[parameters('adPDCNICIPAddress')]"
-          },
-          "mainStaticSubnetRef": {
-            "value": "[variables('mainStaticSubnetRef')]"
-          },
-          "drStaticSubnetRef": {
-            "value": "[variables('drStaticSubnetRef')]"
-          },
-          "adBDCNicName": {
-            "value": "[variables('adBDCNicName')]"
-          },
-          "adBDCNICIPAddress": {
-            "value": "[parameters('adBDCNICIPAddress')]"
-          },
-          "mainSqlVMName": {
-            "value": "[variables('vmSettings').mainSqlVMName]"
-          },
-          "mainSqlSubnetRef": {
-            "value": "[variables('mainSqlSubnetRef')]"
-          },
-          "drSqlVMName": {
-            "value": "[variables('vmSettings').drSqlVMName]"
-          },
-          "drSqlSubnetRef": {
-            "value": "[variables('drSqlSubnetRef')]"
-          },          
-          "mainSqlBEAddressPoolID": {
-            "value": "[variables('derivedIds').mainSqlBEAddressPoolID]"
-          },
-          "drSqlBEAddressPoolID": {
-            "value": "[variables('derivedIds').drSqlBEAddressPoolID]"
-          },
-          "sqlwNicName": {
-            "value": "[variables('sqlwNicName')]"
-          },
-          "primaryDCIPAddressNameWithSuffix": {
-            "value": "[variables('primaryDCIPAddressNameWithSuffix')]"
-          },
-          "backupDCIPAddressNameWithSuffix": {
-            "value": "[variables('backupDCIPAddressNameWithSuffix')]"
           }
         }
       }

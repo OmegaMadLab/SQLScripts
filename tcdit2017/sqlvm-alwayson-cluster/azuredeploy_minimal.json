@@ -344,7 +344,7 @@
       "mainSqllbProbeID": "[concat(variables('ids').mainSqllbID,'/probes/',parameters('environmentPrefix'),'-',variables('SQLAOProbe'),'-',parameters('mainResSuffix'))]",
       "drSqlBEAddressPoolID": "[concat(variables('ids').drSqllbID,'/backendAddressPools/',variables('lbSettings').drSqlLBBE)]",
       "drSqllbFEConfigID": "[concat(variables('ids').drSqllbID,'/frontendIPConfigurations/',variables('lbSettings').drSqlLBFE)]",
-      "drSqllbProbeID": "[concat(variables('ids').mainSqllbID,'/probes/',parameters('environmentPrefix'),'-',variables('SQLAOProbe'),'-',parameters('drResSuffix'))]"
+      "drSqllbProbeID": "[concat(variables('ids').drSqllbID,'/probes/',parameters('environmentPrefix'),'-',variables('SQLAOProbe'),'-',parameters('drResSuffix'))]"
     },
     "vmSettings": {
       "availabilitySets": {
