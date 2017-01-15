@@ -8,6 +8,12 @@
     "drLocation": {
       "type": "string"
     },
+    "mainLocationPrefix": {
+      "type": "string"
+    },
+    "drLocationPrefix": {
+      "type": "string"
+    },
     "AdAvailabilitySetName": {
       "type": "string"
     },
@@ -61,12 +67,12 @@
     }
   },
   "variables": {
-    "mainADstorageName": "[concat(parameters('adStorageAccountName'),parameters('mainLocation'))]",
-    "drADstorageName": "[concat(parameters('adStorageAccountName'),parameters('drLocation'))]",
-    "mainDiagstorageName": "[concat(parameters('diagStorageAccountName'),parameters('mainLocation'))]",
-    "drDiagstorageName": "[concat(parameters('diagStorageAccountName'),parameters('drLocation'))]",
-    "mainAvSetName": "[concat(parameters('AdAvailabilitySetName'),parameters('mainLocation'))]",
-    "drAvSetName": "[concat(parameters('AdAvailabilitySetName'),parameters('drLocation'))]"
+    "mainADstorageName": "[concat(parameters('adStorageAccountName'),parameters('mainLocationPrefix'))]",
+    "drADstorageName": "[concat(parameters('adStorageAccountName'),parameters('drLocationPrefix'))]",
+    "mainDiagstorageName": "[concat(parameters('diagStorageAccountName'),parameters('mainLocationPrefix'))]",
+    "drDiagstorageName": "[concat(parameters('diagStorageAccountName'),parameters('drLocationPrefix'))]",
+    "mainAvSetName": "[concat(parameters('AdAvailabilitySetName'),parameters('mainLocationPrefix'))]",
+    "drAvSetName": "[concat(parameters('AdAvailabilitySetName'),parameters('drLocationPrefix'))]"
   },
   "resources": [
     {
