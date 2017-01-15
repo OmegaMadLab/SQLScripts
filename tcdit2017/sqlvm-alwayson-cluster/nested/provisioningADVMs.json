@@ -56,6 +56,12 @@
     "adBDCNICIPAddress": {
       "type": "string"
     },
+    "adBDCConfigurationFunction": {
+      "type": "string"
+    },
+    "adBDCModulesURL": {
+      "type": "string"
+    },
     "mainAdStorageAccountName": {
       "type": "string"
     },
@@ -92,7 +98,7 @@
     "drVnetSubnets": {
       "type": "array"
     }
-  }, 
+  },
   "resources": [
     {
       "type": "Microsoft.Compute/availabilitySets",
@@ -225,9 +231,49 @@
           ]
         },
         "dhcpOptions": {
-          "dnsServers": "[parameters('DNSServerAddress')]"
+          "dnsServers": "[parameters('adPDCNICIpAddress')]"
         },
         "subnets": "[parameters('mainVnetSubnets')]"
+      }
+    },
+        {
+      "name": "[parameters('mainVnetName')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "location": "[parameters('mainLocation')]",
+      "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/',parameters('adPDCVMName'),'/extensions/InstallDomainController')]"
+          ],
+      "apiVersion": "2015-06-15",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[parameters('mainVnetAddressSpace')]"
+          ]
+        },
+        "dhcpOptions": {
+          "dnsServers": "[parameters('adPDCNICIpAddress')]"
+        },
+        "subnets": "[parameters('mainVnetSubnets')]"
+      }
+    },    
+    {
+      "name": "[parameters('drVnetName')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "location": "[parameters('drLocation')]",
+      "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/',parameters('adPDCVMName'),'/extensions/InstallDomainController')]"
+          ],
+      "apiVersion": "2015-06-15",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[parameters('drVnetAddressSpace')]"
+          ]
+        },
+        "dhcpOptions": {
+          "dnsServers": "[parameters('adPDCNICIpAddress')]"
+        },
+        "subnets": "[parameters('drVnetSubnets')]"
       }
     },
     {
@@ -291,6 +337,54 @@
             "storageUri": "[concat('http://',parameters('drDiagStorageAccountName'),'.blob.core.windows.net')]"
           }
         }
+      }
+    },
+    {  
+        "type":"Microsoft.Compute/virtualMachines/extensions",
+        "name":"[concat(parameters('adBDCVMName'),'/CreateBDC')]",
+        "apiVersion":"2015-06-15",
+        "location":"[parameters('drLocation')]",
+        "properties":{  
+          "publisher":"Microsoft.Powershell",
+          "type":"DSC",
+          "typeHandlerVersion":"2.19",
+          "autoUpgradeMinorVersion":false,
+          "settings":{  
+              "modulesURL":"[parameters('adBDCModulesURL')]",
+              "configurationFunction": "[parameters('adBDCConfigurationFunction')]",
+              "properties":{  
+                "domainName":"[parameters('domainName')]",
+                "adminCreds":{  
+                    "userName":"[parameters('adminUserName')]",
+                    "password":"privateSettingsRef:adminPassword"
+                }
+              }
+          },
+          "protectedSettings":{  
+              "items":{  
+                "adminPassword":"[parameters('adminPassword')]"
+              }
+          }
+        }
+    },
+    {
+      "name": "[parameters('drVnetName')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "location": "[parameters('drLocation')]",
+      "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/',parameters('adPDCVMName'),'/extensions/CreateBDC')]"
+          ],
+      "apiVersion": "2015-06-15",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[parameters('drVnetAddressSpace')]"
+          ]
+        },
+        "dhcpOptions": {
+          "dnsServers": "[parameters('adBDCNICIpAddress')]"
+        },
+        "subnets": "[parameters('drVnetSubnets')]"
       }
     }
   ],
