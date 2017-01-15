@@ -370,9 +370,6 @@
     "sqlwNicName": "[concat(variables('vmSettings').sqlwVMName,'-nic')]",
     "primaryDCIPAddressNameWithSuffix": "[concat(variables('vmSettings').adPDCVMName,'-ip')]",
     "backupDCIPAddressNameWithSuffix": "[concat(variables('vmSettings').adBDCVMName,'-ip')]",
-    "sql0AddressNameWithSuffix": "[concat(variables('vmSettings').mainSqlVMName,'0-ip')]",
-    "sql1AddressNameWithSuffix": "[concat(variables('vmSettings').mainSqlVMName,'1-ip')]",
-    "sql2AddressNameWithSuffix": "[concat(variables('vmSettings').drSqlVMName,'0-ip')]",
     "configuration": {
       "vnet2vnetTemplateURL": "[concat(parameters('templatesBaseUrl'),'/vnet2vnet.json')]",
       "vnetwithDNSTemplateURL": "[concat(parameters('templatesBaseUrl'),'/vnet-with-dns-server.json')]",
@@ -432,9 +429,6 @@
           "adStorageAccountType": {
             "value": "[parameters('adStorageAccountType')]"
           },
-          "DCIPAddressNameWithSuffix": {
-            "value": "[variables('primaryDCIPAddressNameWithSuffix')]"
-          },
           "virtualNetworkName": {
             "value": "[variables('mainVirtualNetworkName')]"
           },
@@ -443,6 +437,9 @@
           },
           "subnets": {
             "value": "[variables('mainSubnets')]"
+          },
+          "DCIPAddressNameWithSuffix": {
+            "value": "primaryDCIPAddressNameWithSuffix"
           }
         }
       }
@@ -480,9 +477,6 @@
           "adStorageAccountType": {
             "value": "[parameters('adStorageAccountType')]"
           },
-          "DCIPAddressNameWithSuffix": {
-            "value": "[variables('backupDCIPAddressNameWithSuffix')]"
-          },
           "virtualNetworkName": {
             "value": "[variables('drVirtualNetworkName')]"
           },
@@ -491,7 +485,10 @@
           },
           "subnets": {
             "value": "[variables('drSubnets')]"
-          }
+          },
+          "DCIPAddressNameWithSuffix": {
+            "value": "backupDCIPAddressNameWithSuffix"
+          }          
         }
       }
     },
@@ -705,15 +702,6 @@
           },
           "backupDCIPAddressNameWithSuffix": {
             "value": "[variables('backupDCIPAddressNameWithSuffix')]"
-          },
-          "sql0AddressNameWithSuffix": {
-            "value": "[variables('sql0AddressNameWithSuffix')]"
-          },
-          "sql1AddressNameWithSuffix": {
-            "value": "[variables('sql1AddressNameWithSuffix')]"
-          },
-          "sql2AddressNameWithSuffix": {
-            "value": "[variables('sql2AddressNameWithSuffix')]"
           }
         }
       }
