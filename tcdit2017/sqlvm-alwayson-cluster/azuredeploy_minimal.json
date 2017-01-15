@@ -769,7 +769,7 @@
           "adPDCNicName": {
             "value": "[variables('adPDCNicName')]"
           },
-          "adPCDNICIPAddress": {
+          "adPDCNICIPAddress": {
             "value": "10.0.0.4"
           },
           "domainName": {
@@ -793,7 +793,7 @@
           "adBDCNicName": {
             "value": "[variables('adBDCNicName')]"
           },
-          "adBCDNICIPAddress": {
+          "adBDCNICIPAddress": {
             "value": "172.16.0.5"
           },
           "mainVnetName": {
