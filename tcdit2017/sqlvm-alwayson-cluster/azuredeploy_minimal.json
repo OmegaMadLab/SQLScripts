@@ -400,7 +400,8 @@
       "creatingNicsUrl": "[concat(parameters('templatesBaseUrl'),'/creatingNICS.json')]",
       "storageAccountVirtualNetworkPublicIP": "[concat(parameters('templatesBaseUrl'),'/storageAccountVirtualNetworkPublicIP.json')]",
       "provisioningADVMs": "[concat(parameters('templatesBaseUrl'),'/provisioningADVMs.json')]",
-      "provisioningFswVM": "[concat(parameters('templatesBaseUrl'),'/provisioningFswVM.json')]",
+      "provisioningSqlAvSets": "[concat(parameters('templatesBaseUrl'),'/provisioningSqlAvSets.json')]",
+      "provisioningFswVMs": "[concat(parameters('templatesBaseUrl'),'/provisioningFswVMs.json')]",
       "configuringBackupADVM": "[concat(parameters('templatesBaseUrl'),'/configuringBackupADVM.json')]",
       "preparingAlwaysOnSqlServer": "[concat(parameters('templatesBaseUrl'),'/preparingSqlServer.json')]",
       "configuringAlwaysOn": "[concat(parameters('templatesBaseUrl'),'/configuringAlwaysOn.json')]",
@@ -955,9 +956,7 @@
       "name": "drVnetUpdatingDNStoBothADVM",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "dependsOn": [
-        "Microsoft.Resources/deployments/ConfiguringBackupADVM"
-      ],
+
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -987,16 +986,43 @@
       }
     },
     {
+      "name": "provisionSqlAvSets",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('configuration').provisioningSqlAvSets]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+                    "mainLocation": {
+            "value": "[parameters('mainDCLocation')]"
+          },
+          "drLocation": {
+            "value": "[parameters('drDCLocation')]"
+          },
+          "mainSqlAvSetName": {
+            "value": "[concat(parameters('environmentPrefix'),'-',variables('vmSettings').availabilitySets.sqlAvailabilitySetName,'-',parameters('mainResSuffix'))]"
+          },
+          "drSqlAvSetName": {
+            "value": "[concat(parameters('environmentPrefix'),'-',variables('vmSettings').availabilitySets.sqlAvailabilitySetName,'-',parameters('drResSuffix'))]"
+          }
+        }
+      }
+    },
+    {
       "name": "ProvisioningFswVM",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [
-        "Microsoft.Resources/deployments/drVnetUpdatingDNStoPrimaryADVM"
+        "Microsoft.Resources/deployments/drVnetUpdatingDNStoPrimaryADVM",
+        "Microsoft.Resources/deployments/provisionSqlAvSets"
       ],
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[variables('configuration').provisioningADVMs]",
+          "uri": "[variables('configuration').provisioningFswVMs]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
