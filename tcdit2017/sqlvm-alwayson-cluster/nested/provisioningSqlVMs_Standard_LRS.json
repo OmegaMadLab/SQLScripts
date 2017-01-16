@@ -175,6 +175,9 @@
          "type":"Microsoft.Compute/virtualMachines/extensions",
          "name":"[concat(parameters('sqlVMName'),copyindex(),'/SqlVmIaasExtension')]",
          "location":"[parameters('location')]",
+         "dependsOn": [
+           "[concat('Microsoft.Compute/virtualMachines/',parameters('sqlVMName'),copyindex())]" 
+         ],
          "properties":{  
             "type":"SqlIaaSAgent",
             "publisher":"Microsoft.SqlServer.Management",
