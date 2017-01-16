@@ -201,7 +201,7 @@
 
         },
         {  
-          "type":"Microsoft.Compute/virtualMachines/extensions",
+          "type":"extensions",
           "name":"[concat(parameters('sqlVMName'),'0/sqlAOPrepare')]",
           "apiVersion":"2015-06-15",
           "location":"[parameters('location')]",
