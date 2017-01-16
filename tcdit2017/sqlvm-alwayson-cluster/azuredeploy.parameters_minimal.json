@@ -9,7 +9,7 @@
             "value":"East US"
         },
         "environmentPrefix":{
-            "value":"mo"
+            "value":"mo3"
         },
         "mainResSuffix":{
             "value":"main"
@@ -88,6 +88,25 @@
         },
         "witnessVMSize":{
             "value":"Standard_D1_v2"
+        },
+        "sqlVMSize": {
+            "value":"Standard_D2_v2"
+        },
+        "sqlServerVersion": {
+            "value": "SQL2016-WS2012R2"
+        },
+        "sqlServerEdition": {
+            "value": "SQLDEV"
+        },
+        "workloadType": {
+            "value": "OLTP"
+        },
+        "sqlServerServiceAccountUserName": {
+            "value": "sjSqlAdmin"
+        },
+        "sqlServerServiceAccountPassword": {
+            "value": "Passw0rd"
         }
+
     }
 }
