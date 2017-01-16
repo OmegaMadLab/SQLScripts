@@ -197,17 +197,13 @@
                   "EnableEncryption":false
                }
             }
-         }
-
-        },
-        {   
+         },
+         "resources": [
+           {   
           "type":"Microsoft.Compute/virtualMachines/extensions",
           "name":"[concat(parameters('sqlVMName'),copyindex(),'/sqlAOPrepare')]",
           "apiVersion":"2015-06-15",
           "location":"[parameters('location')]",
-          "dependsOn":[  
-              "[concat('Microsoft.Compute/virtualMachines/extensions/',parameters('sqlVMName'),copyindex(),'/SqlVmIaasExtension')]"
-          ],
           "properties":{  
               "publisher":"Microsoft.Powershell",
               "type":"DSC",
@@ -238,6 +234,9 @@
                 }
               }
           }
+        }
+         ]
+
         }
       ]
     }
