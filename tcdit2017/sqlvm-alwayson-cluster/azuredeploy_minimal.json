@@ -1269,7 +1269,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(variables('configuration').provisioningSqlVMs,parameters('sqlStorageAccountType'))]",
+          "uri": "[concat(variables('configuration').provisioningSqlVMs,parameters('sqlStorageAccountType'),'.json')]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
@@ -1312,7 +1312,7 @@
           "sqlAvailabilitySetName": {
             "value": "[concat(parameters('environmentPrefix'),'-',variables('vmSettings').availabilitySets.sqlAvailabilitySetName,'-',parameters('mainResSuffix'))]"
           },
-          "noOfSqlVMs": {
+          "noOfSqlVm": {
             "value": 2
           },
           "sqlVMSize": {
