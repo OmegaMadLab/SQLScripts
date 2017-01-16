@@ -206,7 +206,7 @@
           "apiVersion":"2015-06-15",
           "location":"[parameters('location')]",
           "dependsOn":[  
-              "[concat('Microsoft.Compute/virtualMachines/',parameters('sqlVMName'),copyindex(),'/SqlVmIaasExtension')]"
+              "[concat('Microsoft.Compute/virtualMachines/extensions/',parameters('sqlVMName'),copyindex(),'/SqlVmIaasExtension')]"
           ],
           "properties":{  
               "publisher":"Microsoft.Powershell",
