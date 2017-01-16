@@ -576,7 +576,16 @@
       "sqlAOPrepareConfigurationFunction": "PrepareAlwaysOnSqlServer.ps1\\PrepareAlwaysOnSqlServer",
       "createClusterModulesURL": "[concat(parameters('scriptsBaseUrl'),'/CreateFailoverCluster.ps1.zip')]",
       "createClusterConfigurationFunction": "CreateFailoverCluster.ps1\\CreateFailoverCluster"
-    }
+    },
+    "Monday": true,
+    "Tuesday": true,
+    "Wednesday": true,
+    "Thursday": true,
+    "Friday": true,
+    "Saturday": true,
+    "Sunday": true,
+    "Never": false,
+    "Everyday": true
   },
   "resources": [
     {
