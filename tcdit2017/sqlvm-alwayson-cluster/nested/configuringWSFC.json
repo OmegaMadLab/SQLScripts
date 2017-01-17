@@ -39,7 +39,7 @@
    "resources":[  
       {  
          "type":"Microsoft.Compute/virtualMachines/extensions",
-         "name":"[concat(parameters('sqlVMName'),copyIndex(),'/configuringAlwaysOn')]",
+         "name":"[concat(parameters('sqlVMName'),copyIndex(),'/configuringWSFC')]",
          "apiVersion":"2015-06-15",
          "location":"[parameters('location')]",
          "copy": {
