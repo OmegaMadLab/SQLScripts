@@ -168,82 +168,87 @@
             "storageUri": "[concat('http://',parameters('diagStorageAccountName'),'.blob.core.windows.net')]"
           }
         }
-      },
-      "resources": [
-        {
-         "apiVersion":"2015-06-15",
-         "type":"Microsoft.Compute/virtualMachines/extensions",
-         "name":"[concat(parameters('sqlVMName'),copyindex(),'/SqlVmIaasExtension')]",
-         "location":"[parameters('location')]",
-         "dependsOn": [
-           "[concat('Microsoft.Compute/virtualMachines/',parameters('sqlVMName'),copyindex())]" 
-         ],
-         "properties":{  
-            "type":"SqlIaaSAgent",
-            "publisher":"Microsoft.SqlServer.Management",
-            "typeHandlerVersion":"1.2",
-            "autoUpgradeMinorVersion":"true",
-            "settings":{  
-               "AutoTelemetrySettings":{  
-                  "Region":"[parameters('location')]"
-               },
-               "AutoPatchingSettings":{  
-                  "PatchCategory":"WindowsMandatoryUpdates",
-                  "Enable":"[parameters('autoPatchingEnable')]",
-                  "DayOfWeek":"[parameters('autoPatchingDay')]",
-                  "MaintenanceWindowStartingHour":"[int(parameters('autoPatchingStartHour'))]",
-                  "MaintenanceWindowDuration":"60"
-               },
-               "AutoBackupSettings":{  
-                  "Enable":false,
-                  "RetentionPeriod":"30",
-                  "EnableEncryption":false
-               }
-            }
-         },
-         "resources": [
-           {   
-          "type":"Microsoft.Compute/virtualMachines/extensions",
-          "name":"[concat(parameters('sqlVMName'),copyindex(),'/sqlAOPrepare')]",
-          "apiVersion":"2015-06-15",
-          "location":"[parameters('location')]",
-          "properties":{  
-              "publisher":"Microsoft.Powershell",
-              "type":"DSC",
-              "typeHandlerVersion":"2.19",
-              "autoUpgradeMinorVersion":false,
-              "settings":{  
-                "modulesURL":"[parameters('sqlAOPrepareModulesURL')]",
-                "configurationFunction":"[parameters('sqlAOPrepareConfigurationFunction')]",
-                "properties":{  
-                    "domainName":"[parameters('domainName')]",
-                    "sqlAlwaysOnEndpointName":"[parameters('sqlAOEPName')]",
-                    "adminCreds":{  
-                      "userName":"[parameters('adminUserName')]",
-                      "password":"privateSettingsRef:AdminPassword"
-                    },
-                    "sqlServiceCreds":{  
-                      "userName":"[parameters('sqlServerServiceAccountUserName')]",
-                      "password":"privateSettingsRef:SqlServerServiceAccountPassword"
-                    },
-                    "NumberOfDisks":"[parameters('numberOfDisks')]",
-                    "WorkloadType":"[parameters('workloadType')]"
-                }
+      }
+    },
+    {
+        "apiVersion":"2015-06-15",
+        "type":"Microsoft.Compute/virtualMachines/extensions",
+        "name":"[concat(parameters('sqlVMName'),copyindex(),'/SqlVmIaasExtension')]",
+        "location":"[parameters('location')]",
+        "copy": {
+          "name": "sqlVmIaasExtensionLoop",
+          "count": "[parameters('noOfSqlVm')]"
+        },
+        "dependsOn": [
+          "[concat('Microsoft.Compute/virtualMachines/',parameters('sqlVMName'),copyindex())]" 
+        ],
+        "properties":{  
+          "type":"SqlIaaSAgent",
+          "publisher":"Microsoft.SqlServer.Management",
+          "typeHandlerVersion":"1.2",
+          "autoUpgradeMinorVersion":"true",
+          "settings":{  
+              "AutoTelemetrySettings":{  
+                "Region":"[parameters('location')]"
               },
-              "protectedSettings":{  
-                "items":{  
-                    "adminPassword":"[parameters('adminPassword')]",
-                    "sqlServerServiceAccountPassword":"[parameters('sqlServerServiceAccountPassword')]"
-                }
+              "AutoPatchingSettings":{  
+                "PatchCategory":"WindowsMandatoryUpdates",
+                "Enable":"[parameters('autoPatchingEnable')]",
+                "DayOfWeek":"[parameters('autoPatchingDay')]",
+                "MaintenanceWindowStartingHour":"[int(parameters('autoPatchingStartHour'))]",
+                "MaintenanceWindowDuration":"60"
+              },
+              "AutoBackupSettings":{  
+                "Enable":false,
+                "RetentionPeriod":"30",
+                "EnableEncryption":false
               }
           }
         }
-         ]
-
+    },
+    {   
+        "type":"Microsoft.Compute/virtualMachines/extensions",
+        "name":"[concat(parameters('sqlVMName'),copyindex(),'/sqlAOPrepare')]",
+        "apiVersion":"2015-06-15",
+        "location":"[parameters('location')]",
+        "copy": {
+          "name": "sqlVmIaasSqlAOPrepareLoop",
+          "count": "[parameters('noOfSqlVm')]"
+        },
+        "dependsOn": [
+          "[concat('Microsoft.Compute/virtualMachines/',parameters('sqlVMName'),copyindex())]" 
+        ],
+        "properties":{  
+            "publisher":"Microsoft.Powershell",
+            "type":"DSC",
+            "typeHandlerVersion":"2.19",
+            "autoUpgradeMinorVersion":false,
+            "settings":{  
+              "modulesURL":"[parameters('sqlAOPrepareModulesURL')]",
+              "configurationFunction":"[parameters('sqlAOPrepareConfigurationFunction')]",
+              "properties":{  
+                  "domainName":"[parameters('domainName')]",
+                  "sqlAlwaysOnEndpointName":"[parameters('sqlAOEPName')]",
+                  "adminCreds":{  
+                    "userName":"[parameters('adminUserName')]",
+                    "password":"privateSettingsRef:AdminPassword"
+                  },
+                  "sqlServiceCreds":{  
+                    "userName":"[parameters('sqlServerServiceAccountUserName')]",
+                    "password":"privateSettingsRef:SqlServerServiceAccountPassword"
+                  },
+                  "NumberOfDisks":"[parameters('numberOfDisks')]",
+                  "WorkloadType":"[parameters('workloadType')]"
+              }
+            },
+            "protectedSettings":{  
+              "items":{  
+                  "adminPassword":"[parameters('adminPassword')]",
+                  "sqlServerServiceAccountPassword":"[parameters('sqlServerServiceAccountPassword')]"
+              }
+            }
         }
-      ]
     }
-      
   ],
   "outputs": {}
 }
