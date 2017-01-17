@@ -49,7 +49,7 @@
     },
     "autoPatchingStartHour":{  
       "type":"string"
-    },
+    }
   },
   "variables":{  
       "Monday":"[mod(div(add(add(24,int(parameters('autoPatchingStartHour'))),2),24),7)]",

@@ -549,6 +549,7 @@
     "sqlwNicName": "[concat(variables('vmSettings').sqlwVMName,'-nic')]",
     "primaryDCIPAddressNameWithSuffix": "[concat(variables('vmSettings').adPDCVMName,'-ip')]",
     "backupDCIPAddressNameWithSuffix": "[concat(variables('vmSettings').adBDCVMName,'-ip')]",
+    "clusterName": "cluster-sqlha",
     "sharePath": "cluster-fsw",
     "configuration": {
       "vnet2vnetTemplateURL": "[concat(parameters('templatesBaseUrl'),'/vnet2vnet.json')]",
@@ -565,6 +566,7 @@
       "provisioningSqlVMs": "[concat(parameters('templatesBaseUrl'),'/provisioningSqlVMs_')]",
       "configuringSqlVMs": "[concat(parameters('templatesBaseUrl'),'/prepareSqlServer.json')]",
       "configuringBackupADVM": "[concat(parameters('templatesBaseUrl'),'/configuringBackupADVM.json')]",
+      "configuringWSFC": "[concat(parameters('templatesBaseUrl'),'/configuringWSFC.json')]",
       "preparingAlwaysOnSqlServer": "[concat(parameters('templatesBaseUrl'),'/preparingSqlServer.json')]",
       "configuringAlwaysOn": "[concat(parameters('templatesBaseUrl'),'/configuringAlwaysOn.json')]",
       "adPDCModulesURL": "[concat(parameters('scriptsBaseUrl'),'/CreateADPDC.ps1.zip')]",
@@ -576,7 +578,7 @@
       "sqlAOPrepareModulesURL": "[concat(parameters('scriptsBaseUrl'),'/PrepareAlwaysOnSqlServer.ps1.zip')]",
       "sqlAOPrepareConfigurationFunction": "PrepareAlwaysOnSqlServer.ps1\\PrepareAlwaysOnSqlServer",
       "createClusterModulesURL": "[concat(parameters('scriptsBaseUrl'),'/CreateFailoverCluster.ps1.zip')]",
-      "createClusterConfigurationFunction": "CreateFailoverCluster.ps1\\CreateFailoverCluster"
+      "createClusterConfigurationFunction": "CreateFailoverCluster.ps1\\CreateFailoverCluster_custom"
     },
     "Monday": true,
     "Tuesday": true,
@@ -1380,9 +1382,182 @@
           }
         }
       }
+    },
+    {
+      "name": "drPreparingSqlServerVMs",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [
+        "Microsoft.Resources/deployments/provisionSqlAvSets",
+        "Microsoft.Resources/deployments/CreatingNetworkInterfaces",
+        "Microsoft.Resources/deployments/provisioningADVMs"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(variables('configuration').provisioningSqlVMs,parameters('sqlStorageAccountType'),'.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "sqlVMName": {
+            "value": "[variables('vmSettings').drSqlVMName]"
+          },
+          "location": {
+            "value": "[parameters('drDCLocation')]"
+          },
+          "adminUsername": {
+            "value": "[parameters('adminUsername')]"
+          },
+          "adminPassword": {
+            "value": "[parameters('adminPassword')]"
+          },
+          "sqlStorageAccountName": {
+            "value": "[concat(parameters('environmentPrefix'),parameters('sqlStorageAccountName'),parameters('drResSuffix'))]"
+          },
+          "diagStorageAccountName": {
+            "value": "[concat(parameters('environmentPrefix'),parameters('diagStorageAccountName'),parameters('drResSuffix'))]"
+          },
+          "sqlAvailabilitySetName": {
+            "value": "[concat(parameters('environmentPrefix'),'-',variables('vmSettings').availabilitySets.sqlAvailabilitySetName,'-',parameters('drResSuffix'))]"
+          },
+          "noOfSqlVm": {
+            "value": 1
+          },
+          "sqlVMSize": {
+            "value": "[parameters('sqlVmSize')]"
+          },
+          "vmContainerName": {
+            "value": "[variables('vmSettings').vmContainerName]"
+          },
+          "sqlImagePublisher": {
+            "value": "[variables('vmSettings').sqlImagePublisher]"
+          },
+          "sqlImageOffer": {
+              "value": "[variables('vmSettings').sqlImageOffer]"
+          },
+          "sqlImageSKU": {
+            "value": "[variables('vmSettings').sqlImageSKU]"
+          },
+          "autoPatchingDay": {
+            "value": "[parameters('autoPatchingDay')]"
+          },
+          "autoPatchingStartHour": {
+            "value": "[parameters('autoPatchingStartHour')]"
+          },
+          "autoPatchingEnable": {
+            "value": "[variables(parameters('autoPatchingDay'))]"
+          }
+        }
+      }
+    },
+    {
+      "name": "drConfiguringSqlServerVMs",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [
+        "Microsoft.Resources/deployments/drPreparingSqlServerVMs"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('configuration').configuringSqlVMs]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "sqlVMName": {
+            "value": "[variables('vmSettings').drSqlVMName]"
+          },
+          "location": {
+            "value": "[parameters('drDCLocation')]"
+          },
+          "adminUsername": {
+            "value": "[parameters('adminUsername')]"
+          },
+          "adminPassword": {
+            "value": "[parameters('adminPassword')]"
+          },
+          "domainName": {
+            "value": "[parameters('domainName')]"
+          },
+          "sqlAOPrepareModulesURL": {
+            "value": "[variables('configuration').sqlAOPrepareModulesURL]"
+          },
+          "sqlAOPrepareConfigurationFunction": {
+            "value": "[variables('configuration').sqlAOPrepareConfigurationFunction]"
+          },
+          "sqlAOEPName": {
+            "value": "[variables('sqlAOEPName')]"
+          },
+          "sqlServerServiceAccountUserName": {
+            "value": "[parameters('sqlServerServiceAccountUserName')]"
+          },
+          "sqlServerServiceAccountPassword": {
+            "value": "[parameters('sqlServerServiceAccountPassword')]"
+          },
+          "noOfSqlVm": {
+            "value": 1
+          },
+          "numberOfDisks": {
+            "value": "2"
+          },
+          "workloadType": {
+            "value": "[parameters('workloadType')]"
+          }
+        }
+      }
+    },
+        {
+      "name": "mainConfiguringWSFCnodes",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [
+        "Microsoft.Resources/deployments/mainPreparingSqlServerVMs"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('configuration').configuringWSFC]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "sqlVMName": {
+            "value": "[variables('vmSettings').mainSqlVMName]"
+          },
+          "location": {
+            "value": "[parameters('mainDCLocation')]"
+          },
+          "adminUsername": {
+            "value": "[parameters('adminUsername')]"
+          },
+          "adminPassword": {
+            "value": "[parameters('adminPassword')]"
+          },
+          "domainName": {
+            "value": "[parameters('domainName')]"
+          },
+          "createClusterModulesURL": {
+            "value": "[variables('configuration').createClusterModulesURL]"
+          },
+          "createClusterConfigurationFunction": {
+            "value": "[variables('configuration').createClusterConfigurationFunction]"
+          },
+          "clusterName": {
+            "value": "[variables('clusterName')]"
+          },
+          "sharePath": {
+            "value": "[concat('\\\\',variables('vmSettings').sqlwVMName,'\\',variables('sharePath'))]"
+          },
+          "sqlwVMName": {
+            "value": "variables('vmSettings').sqlwVMName"
+          },
+          "noOfSqlVm": {
+            "value": 2
+          }
+        }
+      }
     }
+
   ],
   "outputs": {}
 }
 
-  
