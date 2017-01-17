@@ -563,6 +563,7 @@
       "provisioningSqlAvSets": "[concat(parameters('templatesBaseUrl'),'/provisioningSqlAvSets.json')]",
       "provisioningFswVMs": "[concat(parameters('templatesBaseUrl'),'/provisioningFswVMs.json')]",
       "provisioningSqlVMs": "[concat(parameters('templatesBaseUrl'),'/provisioningSqlVMs_')]",
+      "configuringSqlVMs": "[concat(parameters('templatesBaseUrl'),'/prepareSqlServer.json')]",
       "configuringBackupADVM": "[concat(parameters('templatesBaseUrl'),'/configuringBackupADVM.json')]",
       "preparingAlwaysOnSqlServer": "[concat(parameters('templatesBaseUrl'),'/preparingSqlServer.json')]",
       "configuringAlwaysOn": "[concat(parameters('templatesBaseUrl'),'/configuringAlwaysOn.json')]",
@@ -1325,18 +1326,16 @@
       }
     },
     {
-      "name": "mainPreparingSqlServerVMs",
+      "name": "mainConfiguringSqlServerVMs",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [
-        "Microsoft.Resources/deployments/provisionSqlAvSets",
-        "Microsoft.Resources/deployments/CreatingNetworkInterfaces",
-        "Microsoft.Resources/deployments/provisioningADVMs"
+        "Microsoft.Resources/deployments/mainPreparingSqlServerVMs"
       ],
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(variables('configuration').provisioningSqlVMs,parameters('sqlStorageAccountType'),'.json')]",
+          "uri": "[variables('configuration').configuringSqlVMs]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {

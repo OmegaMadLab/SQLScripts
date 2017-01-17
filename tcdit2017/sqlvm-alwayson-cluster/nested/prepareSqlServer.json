@@ -52,9 +52,6 @@
           "name": "sqlVmIaasSqlAOPrepareLoop",
           "count": "[parameters('noOfSqlVm')]"
         },
-        "dependsOn": [
-          "[concat('Microsoft.Compute/virtualMachines/',parameters('sqlVMName'),copyindex())]" 
-        ],
         "properties":{  
             "publisher":"Microsoft.Powershell",
             "type":"DSC",
