@@ -187,7 +187,7 @@ configuration PrepareAlwaysOnSqlServer
             DependsOn = "[xSqlTsqlEndpoint]AddSqlServerEndpoint"
         }
 
-        cSqlServer ConfigureSqlServerWithAlwaysOn
+        xSqlServer ConfigureSqlServerWithAlwaysOn
         {
             InstanceName = $env:COMPUTERNAME
             SqlAdministratorCredential = $Admincreds
