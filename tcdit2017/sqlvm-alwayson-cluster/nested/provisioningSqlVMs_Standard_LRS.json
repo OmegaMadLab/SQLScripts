@@ -41,9 +41,6 @@
     "sqlImageSKU": {
       "type": "string"
     },
-    "domainName": {
-      "type": "string"
-    },
     "autoPatchingEnable":{  
       "type":"bool"
     },
@@ -53,27 +50,6 @@
     "autoPatchingStartHour":{  
       "type":"string"
     },
-    "numberOfDisks":{  
-      "type":"string"
-    },
-    "workloadType":{  
-      "type":"string"
-    },
-    "sqlAOPrepareModulesURL":{  
-        "type":"string"
-    },
-    "sqlAOPrepareConfigurationFunction":{  
-        "type":"string"
-    },
-    "sqlAOEPName":{  
-        "type":"string"
-    },
-    "sqlServerServiceAccountUserName":{  
-        "type":"string"
-    },
-    "sqlServerServiceAccountPassword":{  
-        "type":"securestring"
-    }
   },
   "variables":{  
       "Monday":"[mod(div(add(add(24,int(parameters('autoPatchingStartHour'))),2),24),7)]",
@@ -204,49 +180,6 @@
                 "EnableEncryption":false
               }
           }
-        }
-    },
-    {   
-        "type":"Microsoft.Compute/virtualMachines/extensions",
-        "name":"[concat(parameters('sqlVMName'),copyindex(),'/sqlAOPrepare')]",
-        "apiVersion":"2015-06-15",
-        "location":"[parameters('location')]",
-        "copy": {
-          "name": "sqlVmIaasSqlAOPrepareLoop",
-          "count": "[parameters('noOfSqlVm')]"
-        },
-        "dependsOn": [
-          "[concat('Microsoft.Compute/virtualMachines/',parameters('sqlVMName'),copyindex())]" 
-        ],
-        "properties":{  
-            "publisher":"Microsoft.Powershell",
-            "type":"DSC",
-            "typeHandlerVersion":"2.19",
-            "autoUpgradeMinorVersion":false,
-            "settings":{  
-              "modulesURL":"[parameters('sqlAOPrepareModulesURL')]",
-              "configurationFunction":"[parameters('sqlAOPrepareConfigurationFunction')]",
-              "properties":{  
-                  "domainName":"[parameters('domainName')]",
-                  "sqlAlwaysOnEndpointName":"[parameters('sqlAOEPName')]",
-                  "adminCreds":{  
-                    "userName":"[parameters('adminUserName')]",
-                    "password":"privateSettingsRef:AdminPassword"
-                  },
-                  "sqlServiceCreds":{  
-                    "userName":"[parameters('sqlServerServiceAccountUserName')]",
-                    "password":"privateSettingsRef:SqlServerServiceAccountPassword"
-                  },
-                  "NumberOfDisks":"[parameters('numberOfDisks')]",
-                  "WorkloadType":"[parameters('workloadType')]"
-              }
-            },
-            "protectedSettings":{  
-              "items":{  
-                  "adminPassword":"[parameters('adminPassword')]",
-                  "sqlServerServiceAccountPassword":"[parameters('sqlServerServiceAccountPassword')]"
-              }
-            }
         }
     }
   ],
