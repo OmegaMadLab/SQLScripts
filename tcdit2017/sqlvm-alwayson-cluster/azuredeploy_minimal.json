@@ -564,21 +564,16 @@
       "provisioningSqlAvSets": "[concat(parameters('templatesBaseUrl'),'/provisioningSqlAvSets.json')]",
       "provisioningFswVMs": "[concat(parameters('templatesBaseUrl'),'/provisioningFswVMs.json')]",
       "provisioningSqlVMs": "[concat(parameters('templatesBaseUrl'),'/provisioningSqlVMs_')]",
-      "configuringSqlVMs": "[concat(parameters('templatesBaseUrl'),'/prepareSqlServer.json')]",
+      "configuringSqlVMs": "[concat(parameters('templatesBaseUrl'),'/prepareSqlServerAndWSFC.json')]",
       "configuringBackupADVM": "[concat(parameters('templatesBaseUrl'),'/configuringBackupADVM.json')]",
-      "configuringWSFC": "[concat(parameters('templatesBaseUrl'),'/configuringWSFC.json')]",
-      "preparingAlwaysOnSqlServer": "[concat(parameters('templatesBaseUrl'),'/preparingSqlServer.json')]",
-      "configuringAlwaysOn": "[concat(parameters('templatesBaseUrl'),'/configuringAlwaysOn.json')]",
       "adPDCModulesURL": "[concat(parameters('scriptsBaseUrl'),'/CreateADPDC.ps1.zip')]",
       "adPDCConfigurationFunction": "CreateADPDC.ps1\\CreateADPDC",
       "adBDCModulesURL": "[concat(parameters('scriptsBaseUrl'),'/CreateADBDC.ps1.zip')]",
       "adBDCConfigurationFunction": "CreateADBDC.ps1\\CreateADBDC",
       "fswModulesURL": "[concat(parameters('scriptsBaseUrl'),'/CreateFileShareWitness.ps1.zip')]",
       "fswConfigurationFunction": "CreateFileShareWitness.ps1\\CreateFileShareWitness",
-      "sqlAOPrepareModulesURL": "[concat(parameters('scriptsBaseUrl'),'/PrepareAlwaysOnSqlServer.ps1.zip')]",
-      "sqlAOPrepareConfigurationFunction": "PrepareAlwaysOnSqlServer.ps1\\PrepareAlwaysOnSqlServer",
-      "createClusterModulesURL": "[concat(parameters('scriptsBaseUrl'),'/CreateFailoverCluster.ps1.zip')]",
-      "createClusterConfigurationFunction": "CreateFailoverCluster.ps1\\CreateFailoverCluster_custom"
+      "sqlWsfcPrepareModulesURL": "[concat(parameters('scriptsBaseUrl'),'/PrepareSqlServerAndWSFC.ps1.zip')]",
+      "sqlWsfcPrepareConfigurationFunction": "PrepareAlwaysOnSqlServer.ps1\\PrepareSqlServerAndWSFC"
     },
     "Monday": true,
     "Tuesday": true,
@@ -1356,11 +1351,23 @@
           "domainName": {
             "value": "[parameters('domainName')]"
           },
-          "sqlAOPrepareModulesURL": {
-            "value": "[variables('configuration').sqlAOPrepareModulesURL]"
+          "clusterName": {
+            "value": "[variables('clusterName')]"
           },
-          "sqlAOPrepareConfigurationFunction": {
-            "value": "[variables('configuration').sqlAOPrepareConfigurationFunction]"
+          "sharePath": {
+            "value": "[concat('\\\\',variables('vmSettings').sqlwVMName,'\\',variables('sharePath'))]"
+          },
+          "sqlwVMName": {
+            "value": "variables('vmSettings').sqlwVMName"
+          },
+          "noOfSqlVm": {
+            "value": 2
+          },
+          "sqlWsfcPrepareModulesURL": {
+            "value": "[variables('configuration').sqlWsfcPrepareModulesURL]"
+          },
+          "sqlWsfcPrepareConfigurationFunction": {
+            "value": "[variables('configuration').sqlWsfcPrepareConfigurationFunction]"
           },
           "sqlAOEPName": {
             "value": "[variables('sqlAOEPName')]"
@@ -1370,9 +1377,6 @@
           },
           "sqlServerServiceAccountPassword": {
             "value": "[parameters('sqlServerServiceAccountPassword')]"
-          },
-          "noOfSqlVm": {
-            "value": 2
           },
           "numberOfDisks": {
             "value": "2"
@@ -1479,68 +1483,6 @@
           "domainName": {
             "value": "[parameters('domainName')]"
           },
-          "sqlAOPrepareModulesURL": {
-            "value": "[variables('configuration').sqlAOPrepareModulesURL]"
-          },
-          "sqlAOPrepareConfigurationFunction": {
-            "value": "[variables('configuration').sqlAOPrepareConfigurationFunction]"
-          },
-          "sqlAOEPName": {
-            "value": "[variables('sqlAOEPName')]"
-          },
-          "sqlServerServiceAccountUserName": {
-            "value": "[parameters('sqlServerServiceAccountUserName')]"
-          },
-          "sqlServerServiceAccountPassword": {
-            "value": "[parameters('sqlServerServiceAccountPassword')]"
-          },
-          "noOfSqlVm": {
-            "value": 1
-          },
-          "numberOfDisks": {
-            "value": "2"
-          },
-          "workloadType": {
-            "value": "[parameters('workloadType')]"
-          }
-        }
-      }
-    },
-        {
-      "name": "mainConfiguringWSFCnodes",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
-      "dependsOn": [
-        "Microsoft.Resources/deployments/mainPreparingSqlServerVMs"
-      ],
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[variables('configuration').configuringWSFC]",
-          "contentVersion": "1.0.0.0"
-        },
-        "parameters": {
-          "sqlVMName": {
-            "value": "[variables('vmSettings').mainSqlVMName]"
-          },
-          "location": {
-            "value": "[parameters('mainDCLocation')]"
-          },
-          "adminUsername": {
-            "value": "[parameters('adminUsername')]"
-          },
-          "adminPassword": {
-            "value": "[parameters('adminPassword')]"
-          },
-          "domainName": {
-            "value": "[parameters('domainName')]"
-          },
-          "createClusterModulesURL": {
-            "value": "[variables('configuration').createClusterModulesURL]"
-          },
-          "createClusterConfigurationFunction": {
-            "value": "[variables('configuration').createClusterConfigurationFunction]"
-          },
           "clusterName": {
             "value": "[variables('clusterName')]"
           },
@@ -1552,11 +1494,31 @@
           },
           "noOfSqlVm": {
             "value": 2
+          },
+          "sqlWsfcPrepareModulesURL": {
+            "value": "[variables('configuration').sqlWsfcPrepareModulesURL]"
+          },
+          "sqlWsfcPrepareConfigurationFunction": {
+            "value": "[variables('configuration').sqlWsfcPrepareConfigurationFunction]"
+          },
+          "sqlAOEPName": {
+            "value": "[variables('sqlAOEPName')]"
+          },
+          "sqlServerServiceAccountUserName": {
+            "value": "[parameters('sqlServerServiceAccountUserName')]"
+          },
+          "sqlServerServiceAccountPassword": {
+            "value": "[parameters('sqlServerServiceAccountPassword')]"
+          },
+          "numberOfDisks": {
+            "value": "2"
+          },
+          "workloadType": {
+            "value": "[parameters('workloadType')]"
           }
         }
       }
     }
-
   ],
   "outputs": {}
 }
