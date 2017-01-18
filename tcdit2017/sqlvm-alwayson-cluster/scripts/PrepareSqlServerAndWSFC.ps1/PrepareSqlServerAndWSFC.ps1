@@ -37,14 +37,7 @@ configuration PrepareSqlServerAndWSFC
         [String]$SharePath,
 
         [Parameter(Mandatory)]
-        [String[]]$Nodes,
-
-        [Parameter(Mandatory)]
-        [UInt32]$NumberOfDisks,
-
-        [Parameter(Mandatory)]
-        [String]$WorkloadType,
-
+        [String[]]$Nodes
 
         [Int]$RetryCount=20,
         [Int]$RetryIntervalSec=30
