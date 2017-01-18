@@ -37,7 +37,7 @@ configuration PrepareSqlServerAndWSFC
         [String]$SharePath,
 
         [Parameter(Mandatory)]
-        [String[]]$Nodes
+        [String[]]$Nodes,
 
         [Int]$RetryCount=20,
         [Int]$RetryIntervalSec=30
