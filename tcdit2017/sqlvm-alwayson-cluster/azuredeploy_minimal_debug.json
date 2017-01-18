@@ -1355,10 +1355,10 @@
             "value": "[variables('clusterName')]"
           },
           "sharePath": {
-            "value": "[concat('\\\\',variables('vmSettings').sqlwVMName,'\\',variables('sharePath'))]"
+            "value": "[variables('sharePath')]"
           },
           "sqlwVMName": {
-            "value": "variables('vmSettings').sqlwVMName"
+            "value": "[variables('vmSettings').sqlwVMName]"
           },
           "noOfSqlVm": {
             "value": 1
