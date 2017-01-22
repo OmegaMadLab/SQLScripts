@@ -2,95 +2,111 @@
    "$schema":"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
    "contentVersion":"1.0.0.0",
    "parameters":{  
-      "adminUsername":{  
-         "value":"alwaysonadmin"
-      },
-      "adminPassword":{  
-         "value":"GEN-PASSWORD"
-      },
-      "mainDCLocation":{
-          "value":"West Europe"
-      },
-      "drDCLocation":{
-          "value":"East US"
-      },
-      "sqlServerServiceAccountUserName":{  
-         "value":"sqlservice"
-      },
-      "sqlServerServiceAccountPassword":{  
-         "value":"GEN-PASSWORD"
-      },
-      "sqlStorageAccountType":{  
-         "value":"Standard_LRS"
-      },
-      "dcStorageAccountType":{  
-         "value":"Standard_LRS"
-      },
-      "sqlStorageAccountName":{  
-         "value":"GEN-UNIQUE"
-      },
-      "dcStorageAccountName":{  
-         "value":"GEN-UNIQUE"
-      },
-      "fswStorageAccountName":{  
-         "value":"GEN-UNIQUE"
-      },
-      "diagStorageAccountName":{  
-         "value":"GEN-UNIQUE"
-      },
-      "adVMSize":{  
-         "value":"Standard_D1_v2"
-      },
-      "sqlVMSize":{  
-         "value":"Standard_D2_v2"
-      },
-      "witnessVMSize":{  
-         "value":"Standard_D1_v2"
-      },
-      "domainName":{  
-         "value":"contoso.local"
-      },
-      "mainVirtualNetworkAddressRange":{  
-         "value":"10.0.0.0/16"
-      },
-      "mainStaticSubnet":{  
-         "value":"10.0.0.0/24"
-      },
-      "mainSqlSubnet":{  
-         "value":"10.0.1.0/26"
-      },
-      "drVirtualNetworkAddressRange":{  
-         "value":"172.16.0.0/16"
-      },
-      "drStaticSubnet":{  
-         "value":"172.16.0.0/24"
-      },
-      "drSqlSubnet":{  
-         "value":"172.16.1.0/26"
-      },
-      "autoPatchingDay":{  
-         "value":"Sunday"
-      },
-      "autoPatchingStartHour":{  
-         "value":"2"
-      },
-      "sqlAOAGName":{  
-         "value":"alwayson-ag"
-      },
-      "sqlAOListenerPort":{  
-         "value":"1433"
-      },
-      "sqlAOListenerName":{  
-         "value":"alwayson-ag-listener"
-      },
-      "sqlServerVersion":{  
-         "value":"SQL2014SP1-WS2012R2"
-      },
-      "numberOfSqlVMDisks":{  
-         "value":"2"
-      },
-      "workloadType":{  
-         "value":"OLTP"
-      }
-   }
+        "mainDCLocation":{
+            "value":"West Europe"
+        },
+        "drDCLocation":{
+            "value":"East US"
+        },
+        "environmentPrefix":{
+            "value":"tcdit"
+        },
+        "mainResSuffix":{
+            "value":"main"
+        },
+        "drResSuffix":{
+            "value":"dr"
+        },
+        "sqlStorageAccountType":{  
+            "value":"Standard_LRS"
+        },
+        "adStorageAccountType":{  
+            "value":"Standard_LRS"
+        },
+        "sqlStorageAccountName":{  
+            "value":"sqlsa"
+        },
+        "adStorageAccountName":{  
+            "value":"adsa"
+        },
+        "fswStorageAccountName":{  
+            "value":"fswsa"
+        },
+        "diagStorageAccountName":{  
+            "value":"diagsa"
+        },
+        "mainVirtualNetworkAddressRange":{  
+            "value":"10.0.0.0/16"
+        },
+        "mainStaticSubnet":{  
+            "value":"10.0.0.0/24"
+        },
+        "mainSqlSubnet":{  
+            "value":"10.0.1.0/24"
+        },
+        "mainGWSubnet":{  
+            "value":"10.0.2.0/28"
+        },
+        "drVirtualNetworkAddressRange":{  
+            "value":"172.16.0.0/16"
+        },
+        "drStaticSubnet":{  
+            "value":"172.16.0.0/24"
+        },
+        "drSqlSubnet":{  
+            "value":"172.16.1.0/24"
+        },
+        "drGWSubnet":{  
+            "value":"172.16.2.0/28"
+        },
+        "vpnSharedKey":{
+            "value":"StR0nGkEy"
+        },
+        "mainSqlLBIPAddress":{
+            "value": "10.0.1.9"
+        },
+        "drSqlLBIPAddress":{
+            "value": "172.16.1.9"
+        },
+        "adPDCNICIPAddress":{
+            "value": "10.0.0.4"
+        },
+        "adBDCNICIPAddress":{
+            "value": "172.16.0.5"
+        },
+        "domainName":{
+            "value": "tcdit17demo.local"
+        },
+        "adminUsername":{  
+         "value":"sjadmin"
+        },
+        "adminPassword":{  
+            "value":"Passw0rd"
+        },
+        "adVMSize":{
+            "value":"Standard_D1_v2"
+        },
+        "witnessVMSize":{
+            "value":"Standard_D1_v2"
+        },
+        "sqlVMSize": {
+            "value":"Standard_D2_v2"
+        },
+        "sqlServerVersion": {
+            "value": "SQL2016SP1-WS2016"
+        },
+        "sqlServerEdition": {
+            "value": "SQLDEV"
+        },
+        "workloadType": {
+            "value": "OLTP"
+        },
+        "sqlServerServiceAccountUserName": {
+            "value": "sjSqlAdmin"
+        },
+        "sqlServerServiceAccountPassword": {
+            "value": "Passw0rd"
+        }
+
+    }
 }

@@ -1,0 +1,187 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "adminUsername": {
+      "type": "string"
+    },
+    "adminPassword": {
+      "type": "securestring"
+    },
+    "sqlVMName": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "sqlStorageAccountName": {
+      "type": "string"
+    },
+    "diagStorageAccountName": {
+      "type": "string"
+    },
+    "sqlAvailabilitySetName": {
+      "type": "string"
+    },
+    "noOfSqlVm": {
+      "type": "int"
+    },
+    "sqlVMSize": {
+      "type": "string"
+    },
+    "vmContainerName": {
+      "type": "string"
+    },
+    "sqlImagePublisher": {
+      "type": "string"
+    },
+    "sqlImageOffer": {
+      "type": "string"
+    },
+    "sqlImageSKU": {
+      "type": "string"
+    },
+    "autoPatchingEnable":{  
+      "type":"bool"
+    },
+    "autoPatchingDay":{  
+      "type":"string"
+    },
+    "autoPatchingStartHour":{  
+      "type":"string"
+    }
+  },
+  "variables":{  
+      "Monday":"[mod(div(add(add(24,int(parameters('autoPatchingStartHour'))),2),24),7)]",
+      "Tuesday":"[mod(div(add(add(48,int(parameters('autoPatchingStartHour'))),2),24),7)]",
+      "Wednesday":"[mod(div(add(add(72,int(parameters('autoPatchingStartHour'))),2),24),7)]",
+      "Thursday":"[mod(div(add(add(96,int(parameters('autoPatchingStartHour'))),2),24),7)]",
+      "Friday":"[mod(div(add(add(120,int(parameters('autoPatchingStartHour'))),2),24),7)]",
+      "Saturday":"[mod(div(add(add(144,int(parameters('autoPatchingStartHour'))),2),24),7)]",
+      "Sunday":"[mod(div(add(add(168,int(parameters('autoPatchingStartHour'))),2),24),7)]",
+      "Never":"8",
+      "Everyday":"0",
+      "1":"Monday",
+      "2":"Tuesday",
+      "3":"Wednesday",
+      "4":"Thursday",
+      "5":"Friday",
+      "6":"Saturday",
+      "7":"Sunday",
+      "8":"Monday",
+      "0":"Everyday"
+   },
+  "resources": [
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[concat(parameters('sqlVMName'), copyindex())]",
+      "location": "[parameters('location')]",
+      "copy": {
+        "name": "sqlvirtualMachineLoop",
+        "count": "[parameters('noOfSqlVm')]"
+      },
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('sqlVMSize')]"
+        },
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets',parameters('sqlAvailabilitySetName'))]"
+        },
+        "osProfile": {
+          "computerName": "[concat(parameters('sqlVMName'), copyindex())]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[parameters('sqlImagePublisher')]",
+            "offer": "[parameters('sqlImageOffer')]",
+            "sku": "[parameters('sqlImageSKU')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "osdisk",
+            "vhd": {
+              "uri": "[concat('http://',parameters('sqlStorageAccountName'),'.blob.core.windows.net/',parameters('vmContainerName'),'/',parameters('sqlVMName'), copyindex(), '-osdisk.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          },
+          "dataDisks": [
+            {
+              "vhd": {
+                "uri": "[concat('http://',parameters('sqlStorageAccountName'),'.blob.core.windows.net/',parameters('vmContainerName'),'/', parameters('sqlVMName'), copyindex(), '-Data-1.vhd')]"
+              },
+              "name": "[concat(parameters('sqlVMName'), copyindex(),'-data-disk1')]",
+              "caching": "None",
+              "createOption": "Empty",
+              "diskSizeGB": "1000",
+              "lun": 0
+            },
+            {
+              "vhd": {
+                "uri": "[concat('http://',parameters('sqlStorageAccountName'),'.blob.core.windows.net/',parameters('vmContainerName'),'/', parameters('sqlVMName'), copyindex(), '-Data-2.vhd')]"
+              },
+              "name": "[concat(parameters('sqlVMName'), copyindex(),'-data-disk2')]",
+              "caching": "None",
+              "createOption": "Empty",
+              "diskSizeGB": "1000",
+              "lun": 1
+            }
+          ]
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId(resourceGroup().name,'Microsoft.Network/networkInterfaces',concat(parameters('sqlVMName'), copyindex(),'-nic'))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": "true",
+            "storageUri": "[concat('http://',parameters('diagStorageAccountName'),'.blob.core.windows.net')]"
+          }
+        }
+      }
+    },
+    {
+        "apiVersion":"2015-06-15",
+        "type":"Microsoft.Compute/virtualMachines/extensions",
+        "name":"[concat(parameters('sqlVMName'),copyindex(),'/SqlVmIaasExtension')]",
+        "location":"[parameters('location')]",
+        "copy": {
+          "name": "sqlVmIaasExtensionLoop",
+          "count": "[parameters('noOfSqlVm')]"
+        },
+        "dependsOn": [
+          "[concat('Microsoft.Compute/virtualMachines/',parameters('sqlVMName'),copyindex())]" 
+        ],
+        "properties":{  
+          "type":"SqlIaaSAgent",
+          "publisher":"Microsoft.SqlServer.Management",
+          "typeHandlerVersion":"1.2",
+          "autoUpgradeMinorVersion":"true",
+          "settings":{  
+              "AutoTelemetrySettings":{  
+                "Region":"[parameters('location')]"
+              },
+              "AutoPatchingSettings":{  
+                "PatchCategory":"WindowsMandatoryUpdates",
+                "Enable":"[parameters('autoPatchingEnable')]",
+                "DayOfWeek":"[parameters('autoPatchingDay')]",
+                "MaintenanceWindowStartingHour":"[int(parameters('autoPatchingStartHour'))]",
+                "MaintenanceWindowDuration":"60"
+              },
+              "AutoBackupSettings":{  
+                "Enable":false,
+                "RetentionPeriod":"30",
+                "EnableEncryption":false
+              }
+          }
+        }
+    }
+  ],
+  "outputs": {}
+}
