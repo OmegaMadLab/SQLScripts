@@ -1,6 +1,9 @@
 ﻿$mainDatacenterSubnet = '10.0.0.0/16'
 $drDatacenterSubnet = '172.16.0.0/16'
 
+$mainADDC = 'mo3-addc-main'
+$drADDC = 'mo3-addc-dr'
+
 $ilbIpMainSubnet = '10.0.1.9'
 $ilbIpDrSubnet = '172.16.1.9'
 
@@ -55,20 +58,27 @@ ren cn=def* cn=MainDatacenter
 popd
 
 #Add subnet to main AD site
-$ADDC = Get-ADDomainController
-
 $mainADSite = Get-ADReplicationSite
-New-ADReplicationSubnet -Name $mainDatacenterSubnet -Site $mainADSite -Server $ADDC
+New-ADReplicationSubnet -Name $mainDatacenterSubnet -Site $mainADSite -Server $mainADDC
 
 #Add dr AD site with appropriate subnet
-New-ADReplicationSite -Name 'DrDatacenter' -Server $ADDC
-$drADSite = Get-ADReplicationSite -Identity 'DrDatacenter' -Server $ADDC
-New-ADReplicationSubnet -Name $drDatacenterSubnet -Site $drADSite -Server $ADDC
+New-ADReplicationSite -Name 'DrDatacenter' -Server $mainADDC
+$drADSite = Get-ADReplicationSite -Identity 'DrDatacenter' -Server $mainADDC
+New-ADReplicationSubnet -Name $drDatacenterSubnet -Site $drADSite -Server $mainADDC
 
 #Create new site link and remove the default one
 New-ADReplicationSiteLink -Name Main2DR -Cost 100 -InterSiteTransportProtocol IP -ReplicationFrequencyInMinutes 15 -SitesIncluded $mainADSite,$drADSite
 Get-ADReplicationSiteLink -Identity DEFAULTIPSITELINK | Remove-ADReplicationSiteLink -Confirm:$false
 
+#Move DR ADDC to appropriate site
+Move-ADDirectoryServer -Identity $drADDC -Site $drADSite
+
+#Enable intersite Change Notification - Be carefull on production environment!
+$siteLink = Get-ADReplicationSiteLink -Identity Main2DR
+Get-adobject -Identity $siteLink.DistinguishedName -properties options | set-adobject –replace @{options=$($_.options –bor 1)} 
+
+#Reduce DNS -> AD polling interval - Be carefull on production environment!
+invoke-command -Computername $mainADDC, $drADDC -scriptBlock{set-DnsServerDsSetting -PollingInterval 30|Restart-Service -Force dns}
 
 #==========================================================================
 #        Create multisubnet WSFC
@@ -228,10 +238,30 @@ Add-SqlAvailabilityDatabase `
     -Path "SQLSERVER:\SQL\$drReplicaName\Default\AvailabilityGroups\$ag" `
     -Database $db
 
+#ReadOnly Replicas and routing list
+$primaryReplica = Get-Item "SQLSERVER:\SQL\$primaryReplicaName\Default\availabilityGroups\$ag\availabilityReplicas\$primaryReplicaName"
+$secondaryReplica = Get-Item "SQLSERVER:\SQL\$primaryReplicaName\Default\availabilityGroups\$ag\availabilityReplicas\$secondaryReplicaName"
+$drReplica = Get-Item "SQLSERVER:\SQL\$primaryReplicaName\Default\availabilityGroups\$ag\availabilityReplicas\$drReplicaName"
+
+Set-SqlAvailabilityReplica -ConnectionModeInPrimaryRole "AllowAllConnections" -InputObject $primaryReplica
+Set-SqlAvailabilityReplica -ConnectionModeInSecondaryRole "AllowReadIntentConnectionsOnly" -InputObject $primaryReplica
+Set-SqlAvailabilityReplica -ReadOnlyRoutingConnectionUrl "TCP://$primaryReplicaName.$domainFqdn`:1433" -InputObject $primaryReplica
+
+Set-SqlAvailabilityReplica -ConnectionModeInPrimaryRole "AllowAllConnections" -InputObject $secondaryReplica
+Set-SqlAvailabilityReplica -ConnectionModeInSecondaryRole "AllowReadIntentConnectionsOnly" -InputObject $secondaryReplica
+Set-SqlAvailabilityReplica -ReadOnlyRoutingConnectionUrl "TCP://$secondaryReplicaName.$domainFqdn`:1433" -InputObject $secondaryReplica
+
+Set-SqlAvailabilityReplica -ConnectionModeInPrimaryRole "AllowAllConnections" -InputObject $drReplica
+Set-SqlAvailabilityReplica -ConnectionModeInSecondaryRole "AllowReadIntentConnectionsOnly" -InputObject $drReplica
+Set-SqlAvailabilityReplica -ReadOnlyRoutingConnectionUrl "TCP://$drReplicaName.$domainFqdn`:1433" -InputObject $drReplica
+
+Set-SqlAvailabilityReplica -ReadOnlyRoutingList "$secondaryReplicaName","$drReplicaName","$primaryReplicaName" -InputObject $primaryReplica
+Set-SqlAvailabilityReplica -ReadOnlyRoutingList "$primaryReplicaName","$drReplicaName","$secondaryReplicaName" -InputObject $secondaryReplica
+Set-SqlAvailabilityReplica -ReadOnlyRoutingList "$primaryReplicaName","$secondaryReplicaName","$drReplicaName" -InputObject $drReplica
 
 
 #==========================================================================
-#        Configure SQL AlwaysOn AG
+#        Configure SQL AlwaysOn AG Listener
 #==========================================================================
 
 #Client Access Point creation
