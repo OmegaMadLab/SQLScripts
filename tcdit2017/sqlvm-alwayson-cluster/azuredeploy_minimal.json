@@ -510,7 +510,7 @@
     "drStaticSubnetRef": "[concat(variables('drVnetID'),'/subnets/',variables('subnetNames').staticSubnetName)]",
     "drSqlSubnetRef": "[concat(variables('drVnetID'),'/subnets/',variables('subnetNames').sqlSubnetName)]",
     "SQLAOProbe": "SQLAlwaysOnEndPointProbe",
-    "sqlAOEPName": "[concat(parameters('environmentPrefix'),'-sqlhadr')]",
+    "sqlAOEPName": "SqlHaEndpoint",
     "ids": {
       "mainSqllbID": "[resourceId('Microsoft.Network/loadBalancers',variables('lbSettings').mainSqlLBName)]",
       "drSqllbID": "[resourceId('Microsoft.Network/loadBalancers',variables('lbSettings').drSqlLBName)]"
