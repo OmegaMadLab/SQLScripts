@@ -27,9 +27,6 @@ configuration PrepareSqlServerVM
 
         [String]$DomainNetbiosName=(Get-NetBIOSName -DomainName $DomainName),
 
-        [Parameter(Mandatory)]
-        [String[]]$Nodes,
-
         [Int]$RetryCount=20,
         [Int]$RetryIntervalSec=30
     )
@@ -151,33 +148,6 @@ configuration PrepareSqlServerVM
             RebootNodeIfNeeded = $true
         }
 
-        xCluster FailoverCluster
-        {
-            Name = $ClusterName
-            DomainAdministratorCredential = $DomainCreds
-            Nodes = $Nodes
-        }
-
-        xWaitForFileShareWitness WaitForFSW
-        {
-            SharePath = $SharePath
-            DomainAdministratorCredential = $DomainCreds
-            DependsOn = "[xCluster]FailoverCluster"
-
-        }
-
-        xClusterQuorum FailoverClusterQuorum
-        {
-            Name = $ClusterName
-            SharePath = $SharePath
-            DomainAdministratorCredential = $DomainCreds
-        }
-
-        LocalConfigurationManager 
-        {
-            RebootNodeIfNeeded = $true
-        }
-
         xSqlLogin AddDomainAdminAccountToSysadminServerRole
         {
             Name = $DomainCreds.UserName
@@ -185,7 +155,7 @@ configuration PrepareSqlServerVM
             ServerRoles = "sysadmin"
             Enabled = $true
             Credential = $Admincreds
-            DependsOn = "[xCluster]FailoverCluster"
+            DependsOn = "[xComputer]DomainJoin"
         }
 
         xADUser CreateSqlServerServiceAccount
@@ -208,14 +178,6 @@ configuration PrepareSqlServerVM
             DependsOn = "[xADUser]CreateSqlServerServiceAccount"
         }
         
-        xSqlTsqlEndpoint AddSqlServerEndpoint
-        {
-            InstanceName = "MSSQLSERVER"
-            PortNumber = $DatabaseEnginePort
-            SqlAdministratorCredential = $Admincreds
-            DependsOn = "[xSqlLogin]AddSqlServerServiceAccountToSysadminServerRole"
-        }
-
         xSQLServerStorageSettings AddSQLServerStorageSettings
         {
             InstanceName = "MSSQLSERVER"
@@ -231,7 +193,6 @@ configuration PrepareSqlServerVM
             MaxDegreeOfParallelism = 1
             FilePath = "F:\DATA"
             LogPath = "F:\LOG"
-            Hadr = "Enabled"
             DomainAdministratorCredential = $DomainFQDNCreds
             DependsOn = "[xSqlLogin]AddSqlServerServiceAccountToSysadminServerRole"
         }
