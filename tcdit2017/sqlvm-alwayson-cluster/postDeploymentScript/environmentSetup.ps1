@@ -10,7 +10,6 @@ $ilbIpDrSubnet = '172.16.1.9'
 $primaryReplicaName = 'mo3-sql-main0'
 $secondaryReplicaName = 'mo3-sql-main1'
 $drReplicaName = 'mo3-sql-dr0'
-$domainFqdn = 'tcdit17demo.local'
 
 $clusterName = 'sqlhademo'
 $fswPath = '\\mo3-fsw-main\cluster-fsw'
@@ -50,6 +49,7 @@ if($primaryReplicaName -ne $env:computername) {
 #        Create AD Topology
 #==========================================================================
 
+$domainFqdn = (get-addomain).DNSRoot
 
 #Rename default-first-site-name
 pushd

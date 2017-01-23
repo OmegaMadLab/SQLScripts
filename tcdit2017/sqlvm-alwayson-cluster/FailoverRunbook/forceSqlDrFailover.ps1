@@ -1,6 +1,6 @@
 Param(
 [string]$drNodeName,
-[string]$sqlInstance,
+[string]$sqlInstance='MSSQLSERVER',
 [string]$agName
 )
 

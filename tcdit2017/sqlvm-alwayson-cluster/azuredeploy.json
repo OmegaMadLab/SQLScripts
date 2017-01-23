@@ -548,7 +548,7 @@
       "fswModulesURL": "[concat(parameters('scriptsBaseUrl'),'/CreateFileShareWitness.ps1.zip')]",
       "fswConfigurationFunction": "CreateFileShareWitness.ps1\\CreateFileShareWitness",
       "sqlVmPrepareModulesURL": "[concat(parameters('scriptsBaseUrl'),'/PrepareSqlServerVM.ps1.zip')]",
-      "sqlVmPrepareConfigurationFunction": "PrepareSqlServerAndWSFC.ps1\\PrepareSqlServerVM"
+      "sqlVmPrepareConfigurationFunction": "PrepareSqlServerVM.ps1\\PrepareSqlServerVM"
     },
     "Monday": true,
     "Tuesday": true,
