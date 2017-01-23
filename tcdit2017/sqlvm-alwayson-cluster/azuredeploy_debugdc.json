@@ -657,13 +657,109 @@
         }
       }
     },
+        {
+      "name": "mainLoadBalancers",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "comments": "Create Load Balancers for SQL on main datacenter",
+      "dependsOn": [
+        "Microsoft.Resources/deployments/mainStorageAccountVirtualNetworkPublicIP"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('configuration').setupLBsUrl]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "location": {
+            "value": "[parameters('mainDCLocation')]"
+          },
+          "sqlLBName": {
+            "value": "[variables('lbSettings').mainSqlLBName]"
+          },
+          "sqlLBFE": {
+            "value": "[variables('lbSettings').mainSqlLBFE]"
+          },
+          "sqlLBIPAddress": {
+            "value": "[parameters('mainSqlLBIPAddress')]"
+          },
+          "staticSubnetRef": {
+            "value": "[variables('mainSqlSubnetRef')]"
+          },
+          "sqlLBBE": {
+            "value": "[variables('lbSettings').mainSqlLBBE]"
+          },
+          "sqlLBBEID": {
+            "value": "[variables('derivedIds').mainSqlBEAddressPoolID]"
+          },
+          "sqllbFEConfigID": {
+            "value": "[variables('derivedIds').mainSqllbFEConfigID]"
+          },
+          "sqllbProbeID": {
+            "value": "[variables('derivedIds').mainSqllbProbeID]"
+          },
+          "SQLAOProbe": {
+            "value": "[concat(parameters('environmentPrefix'),'-',variables('SQLAOProbe'),'-',parameters('mainResSuffix'))]"
+          }
+        }
+      }
+    },
+    {
+      "name": "drLoadBalancers",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "comments": "Create Load Balancers for SQL on DR datacenter",
+      "dependsOn": [
+        "Microsoft.Resources/deployments/drStorageAccountVirtualNetworkPublicIP"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('configuration').setupLBsUrl]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "location": {
+            "value": "[parameters('drDCLocation')]"
+          },
+          "sqlLBName": {
+            "value": "[variables('lbSettings').drSqlLBName]"
+          },
+          "sqlLBFE": {
+            "value": "[variables('lbSettings').drSqlLBFE]"
+          },
+          "sqlLBIPAddress": {
+            "value": "[parameters('drSqlLBIPAddress')]"
+          },
+          "staticSubnetRef": {
+            "value": "[variables('drSqlSubnetRef')]"
+          },
+          "sqlLBBE": {
+            "value": "[variables('lbSettings').drSqlLBBE]"
+          },
+          "sqlLBBEID": {
+            "value": "[variables('derivedIds').drSqlBEAddressPoolID]"
+          },
+          "sqllbFEConfigID": {
+            "value": "[variables('derivedIds').drSqllbFEConfigID]"
+          },
+          "sqllbProbeID": {
+            "value": "[variables('derivedIds').drSqllbProbeID]"
+          },
+          "SQLAOProbe": {
+            "value": "[concat(parameters('environmentPrefix'),'-',variables('SQLAOProbe'),'-',parameters('drResSuffix'))]"
+          }
+        }
+      }
+    },
     {
       "name": "CreatingNetworkInterfaces",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [
-        "Microsoft.Resources/deployments/mainLoadBalancers",
-        "Microsoft.Resources/deployments/drLoadBalancers"
+        "Microsoft.Resources/deployments/mainStorageAccountVirtualNetworkPublicIP",
+        "Microsoft.Resources/deployments/drStorageAccountVirtualNetworkPublicIP"
       ],
       "properties": {
         "mode": "Incremental",
