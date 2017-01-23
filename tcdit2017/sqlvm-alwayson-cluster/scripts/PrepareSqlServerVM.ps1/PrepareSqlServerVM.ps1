@@ -28,12 +28,6 @@ configuration PrepareSqlServerVM
         [String]$DomainNetbiosName=(Get-NetBIOSName -DomainName $DomainName),
 
         [Parameter(Mandatory)]
-        [String]$ClusterName,
-
-        [Parameter(Mandatory)]
-        [String]$SharePath,
-
-        [Parameter(Mandatory)]
         [String[]]$Nodes,
 
         [Int]$RetryCount=20,
