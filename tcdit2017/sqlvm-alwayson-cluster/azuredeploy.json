@@ -540,7 +540,7 @@
       "provisioningSqlAvSets": "[concat(parameters('templatesBaseUrl'),'/provisioningSqlAvSets.json')]",
       "provisioningFswVMs": "[concat(parameters('templatesBaseUrl'),'/provisioningFswVMs.json')]",
       "provisioningSqlVMs": "[concat(parameters('templatesBaseUrl'),'/provisioningSqlVMs_')]",
-      "configuringSqlVMs": "[concat(parameters('templatesBaseUrl'),'/prepareSqlServerVMs.json')]",
+      "configuringSqlVMs": "[concat(parameters('templatesBaseUrl'),'/prepareAlwaysOnSqlServer.json')]",
       "configuringBackupADVM": "[concat(parameters('templatesBaseUrl'),'/configuringBackupADVM.json')]",
       "adPDCModulesURL": "[concat(parameters('scriptsBaseUrl'),'/CreateADPDC.ps1.zip')]",
       "adPDCConfigurationFunction": "CreateADPDC.ps1\\CreateADPDC",
@@ -548,8 +548,8 @@
       "adBDCConfigurationFunction": "CreateADBDC.ps1\\CreateADBDC",
       "fswModulesURL": "[concat(parameters('scriptsBaseUrl'),'/CreateFileShareWitness.ps1.zip')]",
       "fswConfigurationFunction": "CreateFileShareWitness.ps1\\CreateFileShareWitness",
-      "sqlVmPrepareModulesURL": "[concat(parameters('scriptsBaseUrl'),'/PrepareSqlServerVM.ps1.zip')]",
-      "sqlVmPrepareConfigurationFunction": "PrepareSqlServerVM.ps1\\PrepareSqlServerVM"
+      "sqlVmPrepareModulesURL": "[concat(parameters('scriptsBaseUrl'),'/PrepareAlwaysOnSqlServer.ps1.zip')]",
+      "sqlVmPrepareConfigurationFunction": "PrepareAlwaysOnSqlServer.ps1\\PrepareAlwaysOnSqlServer"
     },
     "Monday": true,
     "Tuesday": true,
@@ -998,7 +998,8 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [
-        "Microsoft.Resources/deployments/ProvisioningADVMs"
+        "Microsoft.Resources/deployments/ProvisioningADVMs",
+        "Microsoft.Resources/deployments/mainVnetUpdatingDNStoPrimaryADVM"
       ],
       "properties": {
         "mode": "Incremental",
