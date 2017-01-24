@@ -515,7 +515,8 @@
       "sqlwVMName": "[concat(parameters('environmentPrefix'),'-fsw-',parameters('mainResSuffix'))]",
       "windowsImagePublisher": "MicrosoftWindowsServer",
       "windowsImageOffer": "WindowsServer",
-      "windowsImageSKU": "2016-Datacenter",
+      "windowsImageSKU": "2012-R2-Datacenter",
+      "fswImageSku": "2016-Datacenter",
       "sqlImagePublisher": "MicrosoftSQLServer",
       "sqlImageOffer": "[parameters('sqlServerVersion')]",
       "sqlImageSKU" : "[parameters('sqlServerEdition')]",
@@ -1204,7 +1205,7 @@
             "value": "[variables('vmSettings').windowsImageOffer]"
           },
           "fswImageSKU": {
-            "value": "[variables('vmSettings').windowsImageSKU]"
+            "value": "[variables('vmSettings').fswImageSku]"
           },
           "vmContainerName": {
             "value": "[variables('vmSettings').vmContainerName]"
