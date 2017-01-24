@@ -122,7 +122,7 @@ function Set-TargetResource
             
             Write-Verbose 'Creating Storage Pool'
          
-            New-StoragePool -FriendlyName 'SqlVMStoragePool' -StorageSubSystemUniqueId (Get-StorageSubSystem -FriendlyName '*Space*').uniqueID -PhysicalDisks (Get-PhysicalDisk -CanPool $true)
+            New-StoragePool -FriendlyName 'SqlVMStoragePool' -StorageSubSystemUniqueId (Get-StorageSubSystem -FriendlyName '*Storage*').uniqueID -PhysicalDisks (Get-PhysicalDisk -CanPool $true)
          
             Write-Verbose 'Creating Virtual Disk'
          
