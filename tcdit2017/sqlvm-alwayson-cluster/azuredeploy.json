@@ -536,7 +536,8 @@
       "setupLBsUrl": "[concat(parameters('templatesBaseUrl'),'/setupLBs.json')]",
       "creatingNicsUrl": "[concat(parameters('templatesBaseUrl'),'/creatingNICS.json')]",
       "storageAccountVirtualNetworkPublicIP": "[concat(parameters('templatesBaseUrl'),'/storageAccountVirtualNetworkPublicIP.json')]",
-      "provisioningADVMs": "[concat(parameters('templatesBaseUrl'),'/provisioningADVMs.json')]",
+      "ProvisioningMainADVM": "[concat(parameters('templatesBaseUrl'),'/provisioningMainAdVM.json')]",
+      "ProvisioningDrADVM": "[concat(parameters('templatesBaseUrl'),'/provisioningDrAdVM.json')]",
       "provisioningSqlAvSets": "[concat(parameters('templatesBaseUrl'),'/provisioningSqlAvSets.json')]",
       "provisioningFswVMs": "[concat(parameters('templatesBaseUrl'),'/provisioningFswVMs.json')]",
       "provisioningSqlVMs": "[concat(parameters('templatesBaseUrl'),'/provisioningSqlVMs_')]",
@@ -877,7 +878,7 @@
       }
     },
     {
-      "name": "ProvisioningADVMs",
+      "name": "ProvisioningMainADVM",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [
@@ -886,15 +887,12 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[variables('configuration').provisioningADVMs]",
+          "uri": "[variables('configuration').ProvisioningMainADVM]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
           "mainLocation": {
             "value": "[parameters('mainDCLocation')]"
-          },
-          "drLocation": {
-            "value": "[parameters('drDCLocation')]"
           },
           "adPDCVMName": {
             "value": "[variables('vmSettings').adPDCVMName]"
@@ -902,20 +900,11 @@
           "mainAdAvailabilitySetName": {
             "value": "[concat(parameters('environmentPrefix'),'-',variables('vmSettings').availabilitySets.adAvailabilitySetName,'-',parameters('mainResSuffix'))]"
           },
-          "drAdAvailabilitySetName": {
-            "value": "[concat(parameters('environmentPrefix'),'-',variables('vmSettings').availabilitySets.adAvailabilitySetName,'-',parameters('drResSuffix'))]"
-          },
           "mainAdStorageAccountName": {
             "value": "[concat(parameters('environmentPrefix'),parameters('adStorageAccountName'),parameters('mainResSuffix'))]"
           },
-          "drAdStorageAccountName": {
-            "value": "[concat(parameters('environmentPrefix'),parameters('adStorageAccountName'),parameters('drResSuffix'))]"
-          },
           "mainDiagStorageAccountName": {
             "value": "[concat(parameters('environmentPrefix'),parameters('diagStorageAccountName'),parameters('mainResSuffix'))]"
-          },
-          "drDiagStorageAccountName": {
-            "value": "[concat(parameters('environmentPrefix'),parameters('diagStorageAccountName'),parameters('drResSuffix'))]"
           },
           "adVMSize": {
             "value": "[parameters('adVMSize')]"
@@ -949,12 +938,6 @@
           },
           "adPDCModulesURL": {
             "value": "[variables('configuration').adPDCModulesURL]"
-          },
-          "adBDCVMName": {
-            "value": "[variables('vmSettings').adBDCVMName]"
-          },
-          "adBDCNicName": {
-            "value": "[variables('adBDCNicName')]"
           }
         }
       }
@@ -964,7 +947,7 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [
-        "Microsoft.Resources/deployments/ProvisioningADVMs"
+        "Microsoft.Resources/deployments/ProvisioningMainADVM"
       ],
       "properties": {
         "mode": "Incremental",
@@ -998,8 +981,7 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [
-        "Microsoft.Resources/deployments/ProvisioningADVMs",
-        "Microsoft.Resources/deployments/mainVnetUpdatingDNStoPrimaryADVM"
+        "Microsoft.Resources/deployments/ProvisioningMainADVM"
       ],
       "properties": {
         "mode": "Incremental",
@@ -1029,7 +1011,7 @@
       }
     },
     {
-      "name": "ConfiguringBackupADVM",
+      "name": "ProvisioningDrADVM",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [
@@ -1038,24 +1020,51 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[variables('configuration').configuringBackupADVM]",
+          "uri": "[variables('configuration').ProvisioningDrADVM]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-          "location": {
-            "value": "[parameters('drDCLocation')]"
+          "drLocation": {
+            "value": "[parameters('mainDCLocation')]"
           },
-          "adBDCVMName": {
-            "value": "[variables('vmSettings').adBDCVMName]"
+          "drAdAvailabilitySetName": {
+            "value": "[concat(parameters('environmentPrefix'),'-',variables('vmSettings').availabilitySets.adAvailabilitySetName,'-',parameters('mainResSuffix'))]"
           },
-          "adminUserName": {
+          "drAdStorageAccountName": {
+            "value": "[concat(parameters('environmentPrefix'),parameters('adStorageAccountName'),parameters('mainResSuffix'))]"
+          },
+          "drDiagStorageAccountName": {
+            "value": "[concat(parameters('environmentPrefix'),parameters('diagStorageAccountName'),parameters('mainResSuffix'))]"
+          },
+          "adVMSize": {
+            "value": "[parameters('adVMSize')]"
+          },
+          "adminUsername": {
             "value": "[parameters('adminUsername')]"
           },
           "adminPassword": {
             "value": "[parameters('adminPassword')]"
           },
+          "adImagePublisher": {
+            "value": "[variables('vmSettings').windowsImagePublisher]"
+          },
+          "adImageOffer": {
+            "value": "[variables('vmSettings').windowsImageOffer]"
+          },
+          "adImageSKU": {
+            "value": "[variables('vmSettings').windowsImageSKU]"
+          },
+          "vmContainerName": {
+            "value": "[variables('vmSettings').vmContainerName]"
+          },
+          "adBDCNicName": {
+            "value": "[variables('adPDCNicName')]"
+          },
           "domainName": {
             "value": "[parameters('domainName')]"
+          },
+          "adBDCVMName": {
+            "value": "[variables('vmSettings').adBDCVMName]"
           },
           "adBDCConfigurationFunction": {
             "value": "[variables('configuration').adBDCConfigurationFunction]"
@@ -1071,7 +1080,7 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [
-        "Microsoft.Resources/deployments/ConfiguringBackupADVM"
+        "Microsoft.Resources/deployments/ProvisioningDrADVM"
       ],
       "properties": {
         "mode": "Incremental",
@@ -1106,7 +1115,7 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [
-        "Microsoft.Resources/deployments/ConfiguringBackupADVM"
+        "Microsoft.Resources/deployments/ProvisioningDrADVM"
       ],
       "properties": {
         "mode": "Incremental",
@@ -1168,7 +1177,6 @@
       "apiVersion": "2015-01-01",
       "dependsOn": [
         "Microsoft.Resources/deployments/provisionSqlAvSets",
-        "Microsoft.Resources/deployments/provisioningADVMs",
         "Microsoft.Resources/deployments/mainVnetUpdatingDNStoPrimaryADVM"
       ],
       "properties": {
@@ -1238,8 +1246,7 @@
       "apiVersion": "2015-01-01",
       "dependsOn": [
         "Microsoft.Resources/deployments/provisionSqlAvSets",
-        "Microsoft.Resources/deployments/CreatingNetworkInterfaces",
-        "Microsoft.Resources/deployments/provisioningADVMs"
+        "Microsoft.Resources/deployments/mainVnetUpdatingDNStoBothADVM"
       ],
       "properties": {
         "mode": "Incremental",
@@ -1358,8 +1365,7 @@
       "apiVersion": "2015-01-01",
       "dependsOn": [
         "Microsoft.Resources/deployments/provisionSqlAvSets",
-        "Microsoft.Resources/deployments/CreatingNetworkInterfaces",
-        "Microsoft.Resources/deployments/provisioningADVMs"
+        "Microsoft.Resources/deployments/drVnetUpdatingDNStoBothADVM"
       ],
       "properties": {
         "mode": "Incremental",
