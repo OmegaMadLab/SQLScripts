@@ -536,8 +536,8 @@
       "setupLBsUrl": "[concat(parameters('templatesBaseUrl'),'/setupLBs.json')]",
       "creatingNicsUrl": "[concat(parameters('templatesBaseUrl'),'/creatingNICS.json')]",
       "storageAccountVirtualNetworkPublicIP": "[concat(parameters('templatesBaseUrl'),'/storageAccountVirtualNetworkPublicIP.json')]",
-      "ProvisioningMainADVM": "[concat(parameters('templatesBaseUrl'),'/provisioningMainAdVM.json')]",
-      "ProvisioningDrADVM": "[concat(parameters('templatesBaseUrl'),'/provisioningDrAdVM.json')]",
+      "ProvisioningMainADVM": "[concat(parameters('templatesBaseUrl'),'/provisioningMainAdVm.json')]",
+      "ProvisioningDrADVM": "[concat(parameters('templatesBaseUrl'),'/provisioningDrAdVm.json')]",
       "provisioningSqlAvSets": "[concat(parameters('templatesBaseUrl'),'/provisioningSqlAvSets.json')]",
       "provisioningFswVMs": "[concat(parameters('templatesBaseUrl'),'/provisioningFswVMs.json')]",
       "provisioningSqlVMs": "[concat(parameters('templatesBaseUrl'),'/provisioningSqlVMs_')]",
@@ -1025,16 +1025,16 @@
         },
         "parameters": {
           "drLocation": {
-            "value": "[parameters('mainDCLocation')]"
+            "value": "[parameters('drDCLocation')]"
           },
           "drAdAvailabilitySetName": {
-            "value": "[concat(parameters('environmentPrefix'),'-',variables('vmSettings').availabilitySets.adAvailabilitySetName,'-',parameters('mainResSuffix'))]"
+            "value": "[concat(parameters('environmentPrefix'),'-',variables('vmSettings').availabilitySets.adAvailabilitySetName,'-',parameters('drResSuffix'))]"
           },
           "drAdStorageAccountName": {
-            "value": "[concat(parameters('environmentPrefix'),parameters('adStorageAccountName'),parameters('mainResSuffix'))]"
+            "value": "[concat(parameters('environmentPrefix'),parameters('adStorageAccountName'),parameters('drResSuffix'))]"
           },
           "drDiagStorageAccountName": {
-            "value": "[concat(parameters('environmentPrefix'),parameters('diagStorageAccountName'),parameters('mainResSuffix'))]"
+            "value": "[concat(parameters('environmentPrefix'),parameters('diagStorageAccountName'),parameters('drResSuffix'))]"
           },
           "adVMSize": {
             "value": "[parameters('adVMSize')]"
@@ -1058,7 +1058,7 @@
             "value": "[variables('vmSettings').vmContainerName]"
           },
           "adBDCNicName": {
-            "value": "[variables('adPDCNicName')]"
+            "value": "[variables('adBDCNicName')]"
           },
           "domainName": {
             "value": "[parameters('domainName')]"
