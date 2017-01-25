@@ -47,6 +47,11 @@ configuration PrepareAlwaysOnSqlServer
 
     Node localhost
     {
+        LocalConfigurationManager 
+        {
+            RebootNodeIfNeeded = $true
+        }
+
         xSqlCreateVirtualDisk CreateVirtualDisk
         {
             DriveSize = $NumberOfDisks
