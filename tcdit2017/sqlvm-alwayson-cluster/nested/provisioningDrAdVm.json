@@ -130,6 +130,9 @@
           "name":"[concat(parameters('adBDCVMName'),'/CreateBDC')]",
           "apiVersion":"2015-06-15",
           "location":"[parameters('drLocation')]",
+          "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines', parameters('adBDCVMName'))]"
+          ],
           "properties":{  
               "publisher":"Microsoft.Powershell",
               "type":"DSC",
