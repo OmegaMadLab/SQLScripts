@@ -1,18 +1,18 @@
 ﻿$mainDatacenterSubnet = '10.0.0.0/16'
 $drDatacenterSubnet = '172.16.0.0/16'
 
-$mainADDC = 'mo3-addc-main'
-$drADDC = 'mo3-addc-dr'
+$mainADDC = 'tcdit-addc-main'
+$drADDC = 'tcdit-addc-dr'
 
 $ilbIpMainSubnet = '10.0.1.9'
 $ilbIpDrSubnet = '172.16.1.9'
 
-$primaryReplicaName = 'mo3-sql-main0'
-$secondaryReplicaName = 'mo3-sql-main1'
-$drReplicaName = 'mo3-sql-dr0'
+$primaryReplicaName = 'tcdit-sql-main0'
+$secondaryReplicaName = 'tcdit-sql-main1'
+$drReplicaName = 'tcdit-sql-dr0'
 
 $clusterName = 'sqlhademo'
-$fswPath = '\\mo3-fsw-main\cluster-fsw'
+$fswPath = '\\tcdit-fsw-main\cluster-fsw'
 $mainClusterNetName = 'Main datacenter network'
 $drClusterNetName = 'DR datacenter network'
 $mainClusterIpName = 'Main datacenter cluster IP'
@@ -134,7 +134,7 @@ Start-ClusterResource $clusterNameRes
 Set-ClusterQuorum -FileShareWitness $fswPath
 
 #Remove vote from dr node to avoid unwanted failover due to remote site connectivity issues
-(Get-ClusterNode -Name $drReplica).NodeWeight = 0
+(Get-ClusterNode -Name $drReplicaName).NodeWeight = 0
 
 
 #==========================================================================
@@ -301,5 +301,5 @@ Add-ClusterResourceDependency -InputObject $agResource -Resource $cap
 $cap|Start-ClusterResource
 $agResource | Start-ClusterResource
 #6. Assign port 1433 to SQL AG Listener
-Set-SqlAvailabilityGroupListener -Port 1433
+Set-SqlAvailabilityGroupListener -path "SQLSERVER:\SQL\$primaryReplicaName\Default\availabilityGroups\$ag\availabilityGroupListeners\$agListener" -Port 1433
 
