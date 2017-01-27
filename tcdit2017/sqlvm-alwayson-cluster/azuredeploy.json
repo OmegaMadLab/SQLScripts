@@ -515,7 +515,7 @@
       "sqlwVMName": "[concat(parameters('environmentPrefix'),'-fsw-',parameters('mainResSuffix'))]",
       "windowsImagePublisher": "MicrosoftWindowsServer",
       "windowsImageOffer": "WindowsServer",
-      "windowsImageSKU": "2012-R2-Datacenter",
+      "windowsImageSKU": "2016-Datacenter",
       "fswImageSku": "2016-Datacenter",
       "sqlImagePublisher": "MicrosoftSQLServer",
       "sqlImageOffer": "[parameters('sqlServerVersion')]",
