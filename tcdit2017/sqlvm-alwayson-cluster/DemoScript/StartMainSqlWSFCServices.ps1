@@ -47,6 +47,13 @@ ForEach($srvName in $sqlNodes)
        write-host $clusSvc $clusSvc.Status
     }
 
+    
+    While((Get-ClusterNode $srvName).State -ne "Up") {
+        Start-Sleep 30
+        Write-Host "Waiting for cluster node to be online..." -ForegroundColor Green
+    }
+    Write-Host "Cluster node online." -ForegroundColor Green
+
     Write-Host ''
     write-host 'Cluster service on ' $srvName ' started.' -ForegroundColor Green
     Write-Host ''
