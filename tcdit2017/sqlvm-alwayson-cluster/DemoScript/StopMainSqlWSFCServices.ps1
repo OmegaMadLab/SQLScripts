@@ -3,10 +3,10 @@ $sqlSrv = 'MSSQLSERVER'
 $cluster = 'clusSvc'
 
 $sqlNodes = @()
-$sqlNodes += 'mo3-sql-main0'
-$sqlNodes += 'mo3-sql-main1'
+$sqlNodes += 'tcdit-sql-main0'
+$sqlNodes += 'tcdit-sql-main1'
 
-$fswServer = 'mo3-fsw-main'
+$fswServer = 'tcdit-fsw-main'
 
 $timeout = New-Object System.TimeSpan -ArgumentList 0, 0, 30
 
@@ -51,7 +51,7 @@ ForEach($srvName in $sqlNodes)
 
 }
 
-invoke-command -Computername $fswServer -scriptBlock{Set-NetFirewallRule -DisplayGroup "SMB Witness" -Enabled False}
+invoke-command -Computername $fswServer -scriptBlock{Set-NetFirewallRule -DisplayGroup "File and Printer Sharing" -Enabled False}
 Write-Host ''
-write-host 'Firewall rules for SMB Witness disabled on' $fswServer'.' -ForegroundColor Red
+write-host 'Firewall rules for Witness Share disabled on' $fswServer'.' -ForegroundColor Red
 Write-Host ''
