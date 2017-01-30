@@ -172,8 +172,7 @@
       "type": "string",
       "metadata": {
         "description": "The preshared key used to establish vNet to vNet VPN"
-      },
-      "defaultValue": "StR0nGkEy"
+      }
     },
     "adPDCNICIPAddress": {
       "type": "string",
@@ -299,7 +298,7 @@
       "metadata": {
         "description": "The size of the SQL VMs Created"
       },
-      "defaultValue": "Standard_D2v2"
+      "defaultValue": "Standard_D2_v2"
     },
     "domainName": {
       "type": "string",

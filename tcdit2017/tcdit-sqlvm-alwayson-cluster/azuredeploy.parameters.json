@@ -59,9 +59,6 @@
         "drGWSubnet":{  
             "value":"172.16.2.0/28"
         },
-        "vpnSharedKey":{
-            "value":"StR0nGkEy"
-        },
         "mainSqlLBIPAddress":{
             "value": "10.0.1.9"
         },
@@ -76,12 +73,6 @@
         },
         "domainName":{
             "value": "tcdit17demo.local"
-        },
-        "adminUsername":{  
-         "value":"sjadmin"
-        },
-        "adminPassword":{  
-            "value":"Passw0rd"
         },
         "adVMSize":{
             "value":"Standard_D1_v2"
@@ -100,13 +91,6 @@
         },
         "workloadType": {
             "value": "OLTP"
-        },
-        "sqlServerServiceAccountUserName": {
-            "value": "sjSqlAdmin"
-        },
-        "sqlServerServiceAccountPassword": {
-            "value": "Passw0rd"
         }
-
     }
 }
