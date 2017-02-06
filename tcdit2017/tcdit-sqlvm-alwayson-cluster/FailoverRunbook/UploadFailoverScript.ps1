@@ -1,5 +1,5 @@
-$resourceGroupName = 'mo-tcdit17demo3'
-$saName = 'mo3sqlsadr'
+$resourceGroupName = 'tcdit17-sqlhademo'
+$saName = 'tcditsqlsadr'
 $scriptFile = '.\forceSqlDrFailover.ps1'
 
 Add-AzureRmAccount
